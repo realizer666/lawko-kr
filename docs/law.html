@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>법령 보기 — LAWKO</title>
+    <meta name="description" content="대한민국 법령 원문을 보기 쉽게 제공합니다.">
+    <meta name="theme-color" content="#0F172A">
+    <link rel="canonical" href="https://lawko.kr/law.html">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --midnight: #0F172A; --midnight-up: #131c33; --midnight-up2: #172035;
+            --slate: #334155; --steel: #94A3B8; --snow: #F8FAFC; --white: #FFFFFF;
+            --accent: #2563EB; --accent-light: #3B82F6; --accent-dark: #1D4ED8;
+            --accent-ghost: rgba(37,99,235,0.08); --accent-glow: rgba(37,99,235,0.15);
+            --border: #1E293B;
+            --font-ui: 'Noto Sans KR', -apple-system, sans-serif;
+            --font-code: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+        body { font-family: var(--font-ui); background: var(--midnight); color: var(--snow); line-height: 1.7; }
+        a { color: inherit; text-decoration: none; }
+
+        /* Nav */
+        nav { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(15,23,42,0.95); backdrop-filter: blur(12px); z-index: 100; }
+        .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px; color: var(--snow); }
+        .nav-brand span { color: var(--accent-light); }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a { font-size: 14px; color: var(--steel); transition: color 0.2s; }
+        .nav-links a:hover { color: var(--snow); }
+
+        /* Layout */
+        .page-wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+        /* Meta header */
+        .law-header { padding: 40px 0 32px; border-bottom: 1px solid var(--border); }
+        .law-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 16px; line-height: 1.4; }
+        .meta-grid { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+        .meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        .meta-label { color: var(--slate); }
+        .meta-value { color: var(--steel); font-family: var(--font-code); font-size: 12px; }
+        .meta-badge { font-family: var(--font-code); font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 4px; }
+        .meta-badge.법률 { background: rgba(37,99,235,0.12); color: #60A5FA; }
+        .meta-badge.대통령령 { background: rgba(139,92,246,0.12); color: #A78BFA; }
+        .meta-badge.부령 { background: rgba(245,158,11,0.12); color: #FBBF24; }
+        .meta-badge.규칙 { background: rgba(34,197,94,0.12); color: #4ADE80; }
+        .meta-badge.헌법 { background: rgba(239,68,68,0.12); color: #F87171; }
+        .meta-badge.시행 { background: rgba(34,197,94,0.12); color: #4ADE80; }
+        .meta-badge.폐지 { background: rgba(239,68,68,0.12); color: #F87171; }
+
+        .law-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+        .law-action-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 6px; color: var(--steel); font-size: 13px; transition: all 0.15s; cursor: pointer; }
+        .law-action-btn:hover { border-color: var(--accent); color: var(--snow); }
+
+        /* Related laws */
+        .related-laws { padding: 16px 0; border-bottom: 1px solid var(--border); }
+        .related-title { font-size: 13px; color: var(--slate); margin-bottom: 8px; }
+        .related-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .related-link { padding: 6px 12px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; color: var(--steel); transition: all 0.15s; }
+        .related-link:hover { border-color: var(--accent); color: var(--snow); }
+        .related-link.current { border-color: var(--accent); color: var(--accent-light); background: var(--accent-ghost); }
+
+        /* TOC */
+        .toc-toggle { display: flex; align-items: center; gap: 8px; padding: 12px 0; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--steel); border: none; background: none; font-family: var(--font-ui); width: 100%; }
+        .toc-toggle:hover { color: var(--snow); }
+        .toc-toggle svg { transition: transform 0.2s; }
+        .toc-toggle.open svg { transform: rotate(90deg); }
+        .toc-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .toc-content.open { max-height: 2000px; overflow-y: auto; }
+        .toc-list { list-style: none; padding: 0 0 16px; border-bottom: 1px solid var(--border); }
+        .toc-list li { margin: 0; }
+        .toc-list a { display: block; padding: 4px 0; font-size: 13px; color: var(--steel); transition: color 0.15s; }
+        .toc-list a:hover { color: var(--accent-light); }
+        .toc-list .toc-h1 { font-weight: 600; color: var(--snow); padding-top: 8px; }
+        .toc-list .toc-h2 { padding-left: 16px; }
+        .toc-list .toc-h3 { padding-left: 32px; font-size: 12px; }
+
+        /* Law content */
+        .law-content { padding: 32px 0 80px; }
+        .law-body { line-height: 1.9; }
+        .law-body h1 { font-size: 24px; font-weight: 700; margin: 48px 0 16px; padding-top: 24px; border-top: 1px solid var(--border); letter-spacing: -0.01em; }
+        .law-body h1:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+        .law-body h2 { font-size: 20px; font-weight: 700; margin: 36px 0 12px; color: var(--snow); }
+        .law-body h3 { font-size: 17px; font-weight: 600; margin: 28px 0 10px; color: var(--snow); }
+        .law-body h4 { font-size: 15px; font-weight: 600; margin: 20px 0 8px; color: var(--snow); }
+        .law-body h5 { font-size: 15px; font-weight: 600; margin: 16px 0 8px; color: var(--accent-light); }
+        .law-body p { font-size: 15px; color: var(--steel); margin-bottom: 12px; line-height: 1.9; }
+        .law-body strong { color: var(--snow); font-weight: 600; }
+        .law-body ul, .law-body ol { padding-left: 24px; margin-bottom: 12px; }
+        .law-body li { font-size: 15px; color: var(--steel); margin-bottom: 6px; line-height: 1.8; }
+        .law-body table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; overflow-x: auto; display: block; }
+        .law-body th, .law-body td { padding: 10px 14px; border: 1px solid var(--border); text-align: left; color: var(--steel); }
+        .law-body th { background: var(--midnight-up); color: var(--snow); font-weight: 600; white-space: nowrap; }
+        .law-body blockquote { border-left: 3px solid var(--accent); padding: 12px 20px; margin: 16px 0; background: var(--accent-ghost); border-radius: 0 8px 8px 0; }
+        .law-body blockquote p { color: var(--steel); margin-bottom: 0; }
+        .law-body hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+        .law-body a { color: var(--accent-light); border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+        .law-body a:hover { border-bottom-color: var(--accent-light); }
+
+        /* Loading / Error */
+        .loading { text-align: center; padding: 120px 24px; color: var(--steel); }
+        .loading-spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-state { text-align: center; padding: 120px 24px; }
+        .error-state h2 { font-size: 20px; margin-bottom: 8px; }
+        .error-state p { color: var(--steel); font-size: 15px; margin-bottom: 24px; }
+        .error-state a { color: var(--accent-light); }
+
+        /* Back to top */
+        .back-to-top { position: fixed; bottom: 24px; right: 24px; width: 40px; height: 40px; background: var(--accent); border: none; border-radius: 8px; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transform: translateY(8px); transition: all 0.2s; z-index: 50; }
+        .back-to-top.visible { opacity: 1; transform: translateY(0); }
+        .back-to-top:hover { background: var(--accent-light); }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 32px 0; }
+        .footer-content { max-width: 960px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--slate); }
+        .footer-content a { color: var(--steel); text-decoration: none; }
+        .footer-content a:hover { color: var(--snow); }
+        .footer-links { display: flex; gap: 16px; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="index.html" class="nav-brand">LAW<span>KO</span></a>
+        <div class="nav-links">
+            <a href="browse.html">법령 검색</a>
+            <a href="precedent.html">판례 검색</a>
+            <a href="about.html">소개</a>
+        </div>
+    </div>
+</nav>
+
+<div class="page-wrap">
+    <div id="law-header" class="law-header" style="display:none"></div>
+    <div id="related-laws" class="related-laws" style="display:none"></div>
+    <div id="toc-section" style="display:none">
+        <button class="toc-toggle" id="toc-toggle">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            목차
+        </button>
+        <div class="toc-content" id="toc-content">
+            <ul class="toc-list" id="toc-list"></ul>
+        </div>
+    </div>
+    <div class="law-content">
+        <div id="law-body" class="law-body">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>법령을 불러오는 중...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button class="back-to-top" id="back-to-top" title="맨 위로">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<footer>
+    <div class="footer-content">
+        <span>&copy; 2026 LAWKO &middot; 데이터 출처: <a href="https://www.law.go.kr" target="_blank" rel="noopener">국가법령정보센터</a></span>
+        <div class="footer-links">
+            <a href="privacy.html">개인정보처리방침</a>
+            <a href="terms.html">이용약관</a>
+        </div>
+    </div>
+</footer>
+
+<!-- marked.js for markdown rendering -->
+<script src="https://cdn.jsdelivr.net/npm/marked@15/marked.min.js"></script>
+
+<script>
+const REPO_RAW = 'https://raw.githubusercontent.com/9bow/legalize-kr/main/';
+const REPO_URL = 'https://github.com/9bow/legalize-kr';
+
+const params = new URLSearchParams(window.location.search);
+const path = params.get('path');
+
+if (!path) {
+    showError('법령 경로가 지정되지 않았습니다.', '법령 검색 페이지에서 법령을 선택해주세요.');
+} else {
+    loadLaw(path);
+}
+
+async function loadLaw(filePath) {
+    try {
+        // Fetch metadata and markdown in parallel
+        const [metaRes, mdRes] = await Promise.all([
+            fetch('metadata.json'),
+            fetch(REPO_RAW + encodeURI(filePath))
+        ]);
+
+        if (!mdRes.ok) throw new Error('법령 파일을 찾을 수 없습니다.');
+
+        const metadata = await metaRes.json();
+        const mdText = await mdRes.text();
+
+        // Find this law in metadata
+        const lawMeta = Object.values(metadata).find(m => m.path === filePath);
+
+        // Parse frontmatter
+        const { frontmatter, body } = parseFrontmatter(mdText);
+
+        // Update page title
+        const title = frontmatter['제목'] || lawMeta?.제목 || filePath;
+        document.title = `${title} — LAWKO`;
+
+        // Render header
+        renderHeader(frontmatter, lawMeta, filePath);
+
+        // Find related laws (same directory)
+        renderRelated(filePath, metadata);
+
+        // Render markdown
+        renderBody(body);
+
+        // Build TOC
+        buildTOC();
+
+    } catch (err) {
+        showError('법령을 불러오지 못했습니다.', err.message);
+    }
+}
+
+function parseFrontmatter(text) {
+    const match = text.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+    if (!match) return { frontmatter: {}, body: text };
+
+    const fm = {};
+    let currentKey = null;
+    let isList = false;
+
+    match[1].split('\n').forEach(line => {
+        const kvMatch = line.match(/^(\S.*?):\s*(.*)$/);
+        if (kvMatch) {
+            currentKey = kvMatch[1];
+            const val = kvMatch[2].trim();
+            if (val === '') {
+                fm[currentKey] = [];
+                isList = true;
+            } else {
+                fm[currentKey] = val.replace(/^'(.*)'$/, '$1').replace(/^"(.*)"$/, '$1');
+                isList = false;
+            }
+        } else if (currentKey && line.match(/^- /)) {
+            if (!Array.isArray(fm[currentKey])) fm[currentKey] = [];
+            fm[currentKey].push(line.replace(/^- /, '').trim());
+        }
+    });
+
+    return { frontmatter: fm, body: match[2] };
+}
+
+function getBadgeClass(type) {
+    if (type === '법률' || type === '헌법') return type === '헌법' ? '헌법' : '법률';
+    if (type === '대통령령' || type === '대통령긴급명령') return '대통령령';
+    if (type?.endsWith('규칙')) return '규칙';
+    return '부령';
+}
+
+function renderHeader(fm, meta, filePath) {
+    const header = document.getElementById('law-header');
+    const title = fm['제목'] || meta?.제목 || '';
+    const type = fm['법령구분'] || meta?.법령구분 || '';
+    const status = fm['상태'] || meta?.상태 || '';
+    const dept = Array.isArray(fm['소관부처']) ? fm['소관부처'].join(', ') : (fm['소관부처'] || '');
+    const promDate = fm['공포일자'] || '';
+    const effDate = fm['시행일자'] || '';
+    const promNum = fm['공포번호'] || '';
+    const source = fm['출처'] || '';
+
+    const badgeClass = getBadgeClass(type);
+
+    header.innerHTML = `
+        <h1>${title}</h1>
+        <div class="meta-grid">
+            ${type ? `<div class="meta-item"><span class="meta-badge ${badgeClass}">${type}</span></div>` : ''}
+            ${status ? `<div class="meta-item"><span class="meta-badge ${status}">${status}</span></div>` : ''}
+            ${dept ? `<div class="meta-item"><span class="meta-label">소관부처</span><span class="meta-value">${dept}</span></div>` : ''}
+            ${promDate ? `<div class="meta-item"><span class="meta-label">공포일자</span><span class="meta-value">${promDate}</span></div>` : ''}
+            ${promNum ? `<div class="meta-item"><span class="meta-label">공포번호</span><span class="meta-value">${promNum}</span></div>` : ''}
+            ${effDate ? `<div class="meta-item"><span class="meta-label">시행일자</span><span class="meta-value">${effDate}</span></div>` : ''}
+        </div>
+        <div class="law-actions">
+            ${source ? `<a href="${source}" target="_blank" rel="noopener" class="law-action-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                국가법령정보센터
+            </a>` : ''}
+            <a href="${REPO_URL}/blob/main/${encodeURI(filePath)}" target="_blank" rel="noopener" class="law-action-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                GitHub에서 보기
+            </a>
+            <a href="${REPO_URL}/commits/main/${encodeURI(filePath)}" target="_blank" rel="noopener" class="law-action-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
+                개정 이력
+            </a>
+        </div>
+    `;
+    header.style.display = 'block';
+}
+
+function renderRelated(filePath, metadata) {
+    // Extract directory from path: kr/민법/법률.md -> kr/민법/
+    const dirMatch = filePath.match(/^(kr\/[^/]+\/)/);
+    if (!dirMatch) return;
+    const dir = dirMatch[1];
+
+    const related = Object.values(metadata)
+        .filter(m => m.path.startsWith(dir))
+        .sort((a, b) => {
+            const order = { '법률': 0, '헌법': 0, '대통령령': 1, '대통령긴급명령': 1 };
+            const aOrder = order[a.법령구분] ?? 2;
+            const bOrder = order[b.법령구분] ?? 2;
+            return aOrder - bOrder;
+        });
+
+    if (related.length <= 1) return;
+
+    const container = document.getElementById('related-laws');
+    container.innerHTML = `
+        <div class="related-title">관련 법령</div>
+        <div class="related-links">
+            ${related.map(r => {
+                const isCurrent = r.path === filePath;
+                const label = r.path.endsWith('법률.md') ? '법률' :
+                              r.path.endsWith('시행령.md') ? '시행령' :
+                              r.path.endsWith('시행규칙.md') ? '시행규칙' :
+                              r.path.endsWith('대통령령.md') ? '대통령령' :
+                              r.법령구분;
+                return `<a href="law.html?path=${encodeURIComponent(r.path)}" class="related-link ${isCurrent ? 'current' : ''}">${label}</a>`;
+            }).join('')}
+        </div>
+    `;
+    container.style.display = 'block';
+}
+
+function renderBody(mdBody) {
+    marked.setOptions({
+        breaks: false,
+        gfm: true
+    });
+    document.getElementById('law-body').innerHTML = marked.parse(mdBody);
+}
+
+function buildTOC() {
+    const body = document.getElementById('law-body');
+    const headings = body.querySelectorAll('h1, h2, h3');
+    if (headings.length < 3) return;
+
+    const tocList = document.getElementById('toc-list');
+    const items = [];
+
+    headings.forEach((h, i) => {
+        const id = 'section-' + i;
+        h.id = id;
+        const level = h.tagName.toLowerCase();
+        // Only include h1 and h2 in TOC to keep it manageable
+        if (level === 'h1' || level === 'h2') {
+            items.push(`<li><a href="#${id}" class="toc-${level}">${h.textContent}</a></li>`);
+        }
+    });
+
+    if (items.length === 0) return;
+    tocList.innerHTML = items.join('');
+    document.getElementById('toc-section').style.display = 'block';
+
+    // Toggle
+    const toggle = document.getElementById('toc-toggle');
+    const content = document.getElementById('toc-content');
+    toggle.addEventListener('click', () => {
+        toggle.classList.toggle('open');
+        content.classList.toggle('open');
+    });
+
+    // Close TOC on link click
+    tocList.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                toggle.classList.remove('open');
+                content.classList.remove('open');
+            }
+        });
+    });
+}
+
+function showError(title, message) {
+    document.getElementById('law-body').innerHTML = `
+        <div class="error-state">
+            <h2>${title}</h2>
+            <p>${message}</p>
+            <a href="browse.html">법령 검색으로 돌아가기</a>
+        </div>
+    `;
+}
+
+// Back to top button
+const backToTop = document.getElementById('back-to-top');
+window.addEventListener('scroll', () => {
+    backToTop.classList.toggle('visible', window.scrollY > 400);
+});
+backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+
+</body>
+</html>

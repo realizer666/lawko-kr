@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>판례 검색 — LAWKO</title>
+    <meta name="description" content="대한민국 판례를 검색하세요. 대법원, 헌법재판소 등 주요 판례를 제공합니다.">
+    <link rel="canonical" href="https://lawko.kr/precedent.html">
+    <meta name="theme-color" content="#0F172A">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --midnight: #0F172A; --midnight-up: #131c33; --midnight-up2: #172035;
+            --slate: #334155; --steel: #94A3B8; --snow: #F8FAFC; --white: #FFFFFF;
+            --accent: #2563EB; --accent-light: #3B82F6; --accent-dark: #1D4ED8;
+            --accent-ghost: rgba(37,99,235,0.08);
+            --border: #1E293B;
+            --font-ui: 'Noto Sans KR', -apple-system, sans-serif;
+            --font-code: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+        body { font-family: var(--font-ui); background: var(--midnight); color: var(--snow); line-height: 1.7; }
+        a { color: inherit; text-decoration: none; }
+
+        /* Nav */
+        nav { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(15,23,42,0.95); backdrop-filter: blur(12px); z-index: 100; }
+        .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px; color: var(--snow); }
+        .nav-brand span { color: var(--accent-light); }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a { font-size: 14px; color: var(--steel); transition: color 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--snow); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        /* Header */
+        .page-header { padding: 48px 0 32px; }
+        .page-header h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+        .page-header p { font-size: 15px; color: var(--steel); }
+
+        /* Search */
+        .search-bar { position: sticky; top: 57px; z-index: 90; background: rgba(15,23,42,0.95); backdrop-filter: blur(12px); padding: 16px 0; border-bottom: 1px solid var(--border); }
+        .search-form { display: flex; gap: 12px; flex-wrap: wrap; }
+        .search-input-wrap { flex: 1; min-width: 280px; position: relative; }
+        .search-input-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--slate); pointer-events: none; }
+        .search-input { width: 100%; padding: 12px 16px 12px 42px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 8px; color: var(--snow); font-family: var(--font-ui); font-size: 15px; outline: none; transition: border-color 0.2s; }
+        .search-input:focus { border-color: var(--accent); }
+        .search-input::placeholder { color: var(--slate); }
+        .search-btn { padding: 12px 24px; background: var(--accent); border: none; border-radius: 8px; color: var(--white); font-family: var(--font-ui); font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+        .search-btn:hover { background: var(--accent-light); }
+        .search-btn:disabled { opacity: 0.5; cursor: default; }
+
+        .filter-row { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+        .filter-select { padding: 10px 36px 10px 14px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 8px; color: var(--snow); font-family: var(--font-ui); font-size: 14px; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2394A3B8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; transition: border-color 0.2s; }
+        .filter-select:focus { border-color: var(--accent); }
+        .filter-select option { background: var(--midnight-up); color: var(--snow); }
+
+        /* Results info */
+        .results-info { padding: 16px 0 8px; font-size: 13px; color: var(--slate); font-family: var(--font-code); }
+        .results-info strong { color: var(--accent-light); }
+
+        /* Precedent list */
+        .prec-list { display: flex; flex-direction: column; gap: 12px; padding-bottom: 40px; }
+        .prec-card { display: block; padding: 20px; border: 1px solid var(--border); border-radius: 10px; background: var(--midnight-up); transition: border-color 0.2s; }
+        .prec-card:hover { border-color: var(--accent); }
+        .prec-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .prec-badge { font-family: var(--font-code); font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+        .prec-badge.court { background: rgba(37,99,235,0.12); color: #60A5FA; }
+        .prec-badge.type { background: rgba(139,92,246,0.12); color: #A78BFA; }
+        .prec-badge.result-type { background: rgba(34,197,94,0.12); color: #4ADE80; }
+        .prec-case-num { font-family: var(--font-code); font-size: 12px; color: var(--steel); }
+        .prec-date { font-family: var(--font-code); font-size: 12px; color: var(--slate); margin-left: auto; }
+        .prec-title { font-size: 15px; font-weight: 500; line-height: 1.6; color: var(--snow); }
+
+        /* Initial state */
+        .state-box { text-align: center; padding: 80px 24px; }
+        .state-box .icon { font-size: 48px; margin-bottom: 16px; }
+        .state-box p { color: var(--steel); font-size: 15px; }
+        .state-box .hint { color: var(--slate); font-size: 13px; margin-top: 12px; }
+        .example-queries { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 24px; }
+        .example-btn { padding: 8px 16px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--steel); cursor: pointer; transition: all 0.15s; font-family: var(--font-ui); }
+        .example-btn:hover { border-color: var(--accent); color: var(--snow); background: var(--accent-ghost); }
+        .example-btn.highlight { border-color: var(--accent); color: var(--accent-light); background: var(--accent-ghost); }
+
+        /* Loading */
+        .loading-spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; gap: 8px; padding: 24px 0 80px; flex-wrap: wrap; }
+        .page-btn { padding: 8px 14px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 6px; color: var(--steel); font-size: 13px; font-family: var(--font-code); cursor: pointer; transition: all 0.15s; }
+        .page-btn:hover { border-color: var(--accent); color: var(--snow); }
+        .page-btn.active { background: var(--accent); border-color: var(--accent); color: var(--white); }
+        .page-btn:disabled { opacity: 0.3; cursor: default; }
+
+        /* Error */
+        .error-box { padding: 16px 20px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; color: #F87171; font-size: 14px; margin: 16px 0; }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 32px 0; }
+        .footer-content { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--slate); }
+        .footer-content a { color: var(--steel); text-decoration: none; }
+        .footer-content a:hover { color: var(--snow); }
+        .footer-links { display: flex; gap: 16px; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="index.html" class="nav-brand">LAW<span>KO</span></a>
+        <div class="nav-links">
+            <a href="browse.html">법령 검색</a>
+            <a href="precedent.html" class="active">판례 검색</a>
+            <a href="about.html">소개</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>판례 검색</h1>
+        <p>대법원, 헌법재판소 등 주요 판례를 검색하세요.</p>
+    </div>
+</div>
+
+<div class="search-bar">
+    <div class="container">
+        <form class="search-form" id="search-form">
+            <div class="search-input-wrap">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" class="search-input" id="search" placeholder="판례 키워드를 입력하세요 (예: 임대차 보증금)" autofocus>
+            </div>
+            <button type="submit" class="search-btn" id="search-btn">검색</button>
+        </form>
+        <div class="filter-row">
+            <select class="filter-select" id="filter-court">
+                <option value="">모든 법원</option>
+                <option value="대법원">대법원</option>
+                <option value="헌법재판소">헌법재판소</option>
+                <option value="각급법원">하급심</option>
+            </select>
+            <select class="filter-select" id="filter-sort">
+                <option value="ddes">최신순</option>
+                <option value="dasc">오래된순</option>
+                <option value="lasc">사건명순</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="results-info" id="results-info"></div>
+
+    <div id="content">
+        <div class="state-box">
+            <div class="icon">&#x1F50D;</div>
+            <p>검색어를 입력하면 판례를 찾아드립니다.</p>
+            <div class="hint">국가법령정보센터 데이터를 실시간으로 검색합니다.</div>
+            <div class="example-queries">
+                <button class="example-btn highlight" data-q="무죄 판결">무죄 취지 판결</button>
+                <button class="example-btn" data-q="임대차 보증금">임대차 보증금</button>
+                <button class="example-btn" data-q="부당해고">부당해고</button>
+                <button class="example-btn" data-q="명예훼손">명예훼손</button>
+                <button class="example-btn" data-q="상속 유류분">상속 유류분</button>
+                <button class="example-btn" data-q="교통사고 과실">교통사고 과실</button>
+                <button class="example-btn" data-q="손해배상">손해배상</button>
+                <button class="example-btn" data-q="위헌">위헌 결정</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="prec-list" class="prec-list" style="display:none"></div>
+    <div id="pagination" class="pagination"></div>
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <span>&copy; 2026 LAWKO &middot; 데이터 출처: <a href="https://www.law.go.kr" target="_blank" rel="noopener">국가법령정보센터</a></span>
+            <div class="footer-links">
+                <a href="privacy.html">개인정보처리방침</a>
+                <a href="terms.html">이용약관</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+const OC = 'wjdgml89';
+const API_BASE = 'https://www.law.go.kr/DRF/lawSearch.do';
+const PER_PAGE = 20;
+let currentPage = 1;
+let currentQuery = '';
+let totalCount = 0;
+
+const form = document.getElementById('search-form');
+const input = document.getElementById('search');
+const btn = document.getElementById('search-btn');
+const contentEl = document.getElementById('content');
+const listEl = document.getElementById('prec-list');
+const pagEl = document.getElementById('pagination');
+const infoEl = document.getElementById('results-info');
+
+// Example buttons
+document.querySelectorAll('.example-btn').forEach(el => {
+    el.addEventListener('click', () => {
+        input.value = el.dataset.q;
+        doSearch(1);
+    });
+});
+
+form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    doSearch(1);
+});
+
+// URL param support
+const urlQ = new URLSearchParams(window.location.search).get('q');
+if (urlQ) {
+    input.value = urlQ;
+    doSearch(1);
+}
+
+async function doSearch(page) {
+    const query = input.value.trim();
+    if (!query) return;
+
+    currentQuery = query;
+    currentPage = page;
+
+    const url = new URL(window.location);
+    url.searchParams.set('q', query);
+    history.replaceState(null, '', url);
+
+    btn.disabled = true;
+    contentEl.innerHTML = '<div class="state-box"><div class="loading-spinner"></div><p>판례를 검색하는 중...</p></div>';
+    contentEl.style.display = 'block';
+    listEl.style.display = 'none';
+    pagEl.innerHTML = '';
+    infoEl.innerHTML = '';
+
+    try {
+        const court = document.getElementById('filter-court').value;
+        const sort = document.getElementById('filter-sort').value;
+
+        const params = new URLSearchParams({
+            OC: OC,
+            target: 'prec',
+            type: 'JSON',
+            query: query,
+            display: PER_PAGE,
+            page: page,
+            sort: sort
+        });
+        if (court) params.set('court', court);
+
+        const res = await fetch(`${API_BASE}?${params}`);
+        const data = await res.json();
+        renderResults(data);
+    } catch (err) {
+        contentEl.innerHTML = '<div class="error-box">판례를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</div>';
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function renderResults(data) {
+    const precSearch = data.PrecSearch;
+    if (!precSearch || precSearch.totalCnt === '0') {
+        contentEl.innerHTML = '<div class="state-box"><p>검색 결과가 없습니다.</p></div>';
+        infoEl.innerHTML = '';
+        return;
+    }
+
+    totalCount = parseInt(precSearch.totalCnt) || 0;
+    let items = precSearch.prec || [];
+    if (!Array.isArray(items)) items = [items];
+
+    if (items.length === 0) {
+        contentEl.innerHTML = '<div class="state-box"><p>검색 결과가 없습니다.</p></div>';
+        return;
+    }
+
+    infoEl.innerHTML = `"${currentQuery}" 검색 결과 <strong>${totalCount.toLocaleString()}</strong>건`;
+
+    listEl.innerHTML = items.map(p => {
+        const caseNum = p.사건번호 || '';
+        const caseName = p.사건명 || '';
+        const courtName = p.법원명 || '';
+        const caseType = p.사건종류명 || '';
+        const judgeDate = p.선고일자 || '';
+        const serial = p.판례일련번호 || '';
+        const resultType = p.판결유형 || '';
+        const detailUrl = p.판례상세링크 ? `https://www.law.go.kr${p.판례상세링크}` : `https://www.law.go.kr/LSW/precInfoP.do?precSeq=${serial}`;
+
+        return `<a href="${detailUrl}" target="_blank" rel="noopener" class="prec-card">
+            <div class="prec-top">
+                ${courtName ? `<span class="prec-badge court">${courtName}</span>` : ''}
+                ${caseType ? `<span class="prec-badge type">${caseType}</span>` : ''}
+                ${resultType ? `<span class="prec-badge result-type">${resultType}</span>` : ''}
+                <span class="prec-case-num">${caseNum}</span>
+                ${judgeDate ? `<span class="prec-date">${judgeDate}</span>` : ''}
+            </div>
+            <div class="prec-title">${caseName || caseNum}</div>
+        </a>`;
+    }).join('');
+
+    contentEl.style.display = 'none';
+    listEl.style.display = 'flex';
+    renderPagination();
+}
+
+function renderPagination() {
+    const totalPages = Math.ceil(totalCount / PER_PAGE);
+    if (totalPages <= 1) { pagEl.innerHTML = ''; return; }
+
+    const maxPages = Math.min(totalPages, 20);
+    let buttons = [];
+    const maxVisible = 7;
+
+    buttons.push(`<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">&larr;</button>`);
+
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(maxPages, startPage + maxVisible - 1);
+    if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
+
+    if (startPage > 1) {
+        buttons.push(`<button class="page-btn" data-page="1">1</button>`);
+        if (startPage > 2) buttons.push(`<span class="page-btn" style="border:none;cursor:default">...</span>`);
+    }
+    for (let i = startPage; i <= endPage; i++) {
+        buttons.push(`<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`);
+    }
+    if (endPage < maxPages) {
+        if (endPage < maxPages - 1) buttons.push(`<span class="page-btn" style="border:none;cursor:default">...</span>`);
+        buttons.push(`<button class="page-btn" data-page="${maxPages}">${maxPages}</button>`);
+    }
+
+    buttons.push(`<button class="page-btn" ${currentPage === maxPages ? 'disabled' : ''} data-page="${currentPage + 1}">&rarr;</button>`);
+
+    pagEl.innerHTML = buttons.join('');
+    pagEl.querySelectorAll('button[data-page]').forEach(b => {
+        b.addEventListener('click', () => {
+            const p = parseInt(b.dataset.page);
+            if (p >= 1 && p <= maxPages) {
+                doSearch(p);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    });
+}
+
+// Re-search on filter change
+document.getElementById('filter-court').addEventListener('change', () => { if (currentQuery) doSearch(1); });
+document.getElementById('filter-sort').addEventListener('change', () => { if (currentQuery) doSearch(1); });
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== input) {
+        e.preventDefault();
+        input.focus();
+    }
+});
+</script>
+
+</body>
+</html>

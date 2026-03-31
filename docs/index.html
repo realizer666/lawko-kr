@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAWKO — 대한민국 법령 검색</title>
+    <meta name="description" content="대한민국 법령과 판례를 쉽고 빠르게 검색하세요. 5,500여 개 법령을 무료로 제공합니다.">
+    <meta name="keywords" content="법령검색, 법률검색, 판례검색, 대한민국법률, 민법, 형법, 상법, 법령, 시행령, 법률정보">
+    <link rel="canonical" href="https://lawko.kr/">
+    <meta name="theme-color" content="#0F172A">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lawko.kr/">
+    <meta property="og:title" content="LAWKO — 대한민국 법령 검색">
+    <meta property="og:description" content="대한민국 법령과 판례를 쉽고 빠르게 검색하세요.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LAWKO — 대한민국 법령 검색">
+    <meta name="twitter:description" content="대한민국 법령과 판례를 쉽고 빠르게 검색하세요.">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebSite","name":"LAWKO","url":"https://lawko.kr","description":"대한민국 법령과 판례를 쉽고 빠르게 검색하세요.","potentialAction":{"@type":"SearchAction","target":"https://lawko.kr/browse.html?q={search_term_string}","query-input":"required name=search_term_string"}}
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --midnight: #0F172A; --midnight-up: #131c33; --midnight-up2: #172035;
+            --slate: #334155; --steel: #94A3B8; --snow: #F8FAFC; --white: #FFFFFF;
+            --accent: #2563EB; --accent-light: #3B82F6; --accent-dark: #1D4ED8;
+            --accent-ghost: rgba(37,99,235,0.08); --accent-glow: rgba(37,99,235,0.15);
+            --added: #22C55E; --removed: #EF4444;
+            --border: #1E293B;
+            --font-ui: 'Noto Sans KR', -apple-system, sans-serif;
+            --font-code: 'JetBrains Mono', 'Fira Code', monospace;
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+        body { font-family: var(--font-ui); background: var(--midnight); color: var(--snow); line-height: 1.7; overflow-x: hidden; }
+        a { color: inherit; text-decoration: none; }
+
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo); }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+        section { padding: 100px 0; }
+
+        /* Nav */
+        .top-nav { padding: 16px 0; position: absolute; top: 0; left: 0; right: 0; z-index: 10; }
+        .top-nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { font-weight: 700; font-size: 18px; color: var(--snow); letter-spacing: -0.02em; }
+        .nav-brand span { color: var(--accent-light); }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a { font-size: 14px; color: var(--steel); transition: color 0.2s; }
+        .nav-links a:hover { color: var(--snow); }
+
+        /* Hero */
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 80px 0; position: relative; }
+        .hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(ellipse at center, var(--accent-glow) 0%, transparent 70%); pointer-events: none; opacity: 0.5; }
+        .hero-content { position: relative; z-index: 1; }
+        .hero h1 { font-size: clamp(36px, 6vw, 56px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 20px; opacity: 0; animation: fadeUp 0.8s var(--ease-out-expo) 0.3s forwards; }
+        .hero h1 .accent { background: linear-gradient(135deg, var(--accent-light), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero-sub { font-size: clamp(15px, 2vw, 18px); color: var(--steel); max-width: 520px; margin: 0 auto 36px; line-height: 1.7; opacity: 0; animation: fadeUp 0.8s var(--ease-out-expo) 0.5s forwards; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Hero search */
+        .hero-search { width: 100%; max-width: 560px; margin: 0 auto 32px; position: relative; opacity: 0; animation: fadeUp 0.8s var(--ease-out-expo) 0.7s forwards; }
+        .hero-search svg { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--slate); pointer-events: none; }
+        .hero-search input { width: 100%; padding: 16px 20px 16px 48px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 12px; color: var(--snow); font-family: var(--font-ui); font-size: 16px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        .hero-search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ghost); }
+        .hero-search input::placeholder { color: var(--slate); }
+        .hero-search-results { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 12px; max-height: 360px; overflow-y: auto; display: none; z-index: 50; box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
+        .hero-search-results.visible { display: block; }
+        .hero-search-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px; cursor: pointer; transition: background 0.1s; color: var(--snow); }
+        .hero-search-item:hover, .hero-search-item.focused { background: var(--accent-ghost); }
+        .hero-search-item .badge { font-family: var(--font-code); font-size: 10px; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; }
+        .hero-search-item .badge.law { background: rgba(37,99,235,0.12); color: #60A5FA; }
+        .hero-search-item .badge.decree { background: rgba(139,92,246,0.12); color: #A78BFA; }
+        .hero-search-item .badge.rule { background: rgba(245,158,11,0.12); color: #FBBF24; }
+        .hero-search-item .name { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .hero-search-all { display: block; padding: 12px 18px; text-align: center; color: var(--accent-light); font-size: 13px; border-top: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
+        .hero-search-all:hover { background: var(--accent-ghost); }
+
+        .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 48px; opacity: 0; animation: fadeUp 0.8s var(--ease-out-expo) 0.9s forwards; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px; border-radius: 8px; font-family: var(--font-ui); font-size: 14px; font-weight: 600; transition: all 0.2s; cursor: pointer; border: none; }
+        .btn-primary { background: var(--accent); color: var(--white); }
+        .btn-primary:hover { background: var(--accent-light); transform: translateY(-1px); }
+        .btn-outline { background: transparent; color: var(--snow); border: 1px solid var(--border); }
+        .btn-outline:hover { border-color: var(--steel); background: var(--accent-ghost); }
+
+        .hero-stats { display: flex; gap: 48px; justify-content: center; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.8s var(--ease-out-expo) 1.1s forwards; }
+        .hero-stat { text-align: center; }
+        .hero-stat-num { font-size: 32px; font-weight: 700; font-family: var(--font-code); color: var(--accent-light); }
+        .hero-stat-label { font-size: 13px; color: var(--steel); margin-top: 4px; }
+
+        /* Feature cards */
+        .features { background: var(--midnight-up); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
+        @media (max-width: 768px) { .features-grid { grid-template-columns: 1fr; } }
+        .feature-card { padding: 32px; border: 1px solid var(--border); border-radius: 12px; background: var(--midnight); transition: border-color 0.2s; display: block; }
+        .feature-card:hover { border-color: var(--accent); }
+        .feature-icon { font-size: 28px; margin-bottom: 16px; }
+        .feature-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .feature-card p { font-size: 14px; color: var(--steel); line-height: 1.7; }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 48px 0; }
+        .footer-content { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+        .footer-left { font-size: 13px; color: var(--slate); }
+        .footer-left a { color: var(--steel); border-bottom: 1px solid var(--slate); }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-links a { font-size: 13px; color: var(--steel); transition: color 0.2s; }
+        .footer-links a:hover { color: var(--snow); }
+
+        /* Ad placeholder */
+        .ad-slot { max-width: 728px; margin: 0 auto; text-align: center; padding: 16px 0; }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <div class="container">
+        <a href="index.html" class="nav-brand">LAW<span>KO</span></a>
+        <div class="nav-links">
+            <a href="browse.html">법령 검색</a>
+            <a href="precedent.html">판례 검색</a>
+            <a href="about.html">소개</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-content container">
+        <h1>법령을 <span class="accent">쉽고 빠르게.</span></h1>
+        <p class="hero-sub">대한민국 법령과 판례를 검색하세요.<br>5,500여 개 법령을 무료로 제공합니다.</p>
+
+        <div class="hero-search" id="hero-search">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="hero-search-input" placeholder="법령명을 검색하세요...">
+            <div class="hero-search-results" id="hero-search-results"></div>
+        </div>
+
+        <div class="hero-buttons">
+            <a href="browse.html" class="btn btn-primary">전체 법령 보기</a>
+            <a href="precedent.html" class="btn btn-outline">판례 검색</a>
+        </div>
+
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="hero-stat-num" id="stat-total">-</div>
+                <div class="hero-stat-label">법령</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-num" id="stat-law">-</div>
+                <div class="hero-stat-label">법률</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-num" id="stat-decree">-</div>
+                <div class="hero-stat-label">대통령령</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <div class="features-grid">
+            <a href="browse.html" class="feature-card reveal">
+                <div class="feature-icon">&#x1F4DC;</div>
+                <h3>법령 검색</h3>
+                <p>법률, 시행령, 시행규칙 등 5,500여 개 법령을 검색하고 원문을 확인하세요.</p>
+            </a>
+            <a href="precedent.html" class="feature-card reveal" style="transition-delay:0.1s">
+                <div class="feature-icon">&#x2696;&#xFE0F;</div>
+                <h3>판례 검색</h3>
+                <p>대법원, 헌법재판소 등 주요 판례를 키워드로 검색합니다.</p>
+            </a>
+            <a href="browse.html?q=개인정보" class="feature-card reveal" style="transition-delay:0.2s">
+                <div class="feature-icon">&#x1F50D;</div>
+                <h3>키워드 검색</h3>
+                <p>특정 키워드가 포함된 법령을 빠르게 찾아보세요.</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Ad Slot -->
+<div class="ad-slot" id="ad-bottom"></div>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-left">
+                &copy; 2026 LAWKO · 데이터 출처: <a href="https://www.law.go.kr" target="_blank" rel="noopener">국가법령정보센터</a>
+            </div>
+            <div class="footer-links">
+                <a href="privacy.html">개인정보처리방침</a>
+                <a href="terms.html">이용약관</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Reveal
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Stats
+    fetch('stats.json').then(r=>r.json()).then(s => {
+        const f = n => n.toLocaleString('ko-KR');
+        document.getElementById('stat-total').textContent = f(s.total||0);
+        document.getElementById('stat-law').textContent = f(s.types['법률']||0);
+        document.getElementById('stat-decree').textContent = f(s.types['대통령령']||0);
+    }).catch(()=>{});
+
+    // Search
+    let searchData = null, focusedIndex = -1;
+    function getBadgeClass(t) {
+        if (t==='법률'||t==='헌법') return 'law';
+        if (t==='대통령령'||t==='대통령긴급명령') return 'decree';
+        return 'rule';
+    }
+    fetch('metadata.json').then(r=>r.json()).then(d => {
+        searchData = Object.values(d).filter(l=>l.상태==='시행').map(l=>({...l,sk:(l.제목||'').toLowerCase().replace(/\s/g,'')}));
+        searchData.sort((a,b)=>(a.제목||'').localeCompare(b.제목||'','ko'));
+    }).catch(()=>{});
+
+    const si = document.getElementById('hero-search-input');
+    const sr = document.getElementById('hero-search-results');
+    let st;
+    si.addEventListener('input', ()=>{ clearTimeout(st); st=setTimeout(doSearch,150); });
+    si.addEventListener('keydown', e => {
+        const items = sr.querySelectorAll('.hero-search-item');
+        if(e.key==='ArrowDown'){e.preventDefault();focusedIndex=Math.min(focusedIndex+1,items.length-1);items.forEach((it,i)=>it.classList.toggle('focused',i===focusedIndex));}
+        else if(e.key==='ArrowUp'){e.preventDefault();focusedIndex=Math.max(focusedIndex-1,0);items.forEach((it,i)=>it.classList.toggle('focused',i===focusedIndex));}
+        else if(e.key==='Enter'){if(focusedIndex>=0&&items[focusedIndex])window.location.href=items[focusedIndex].getAttribute('href');else window.location.href='browse.html?q='+encodeURIComponent(si.value.trim());}
+        else if(e.key==='Escape'){sr.classList.remove('visible');si.blur();}
+    });
+    function doSearch(){
+        const q=si.value.trim().toLowerCase().replace(/\s/g,'');
+        focusedIndex=-1;
+        if(!q||!searchData){sr.classList.remove('visible');return;}
+        const m=searchData.filter(l=>l.sk.includes(q)).slice(0,8);
+        if(!m.length){sr.innerHTML='<div style="padding:16px;text-align:center;color:var(--slate);font-size:14px;">검색 결과가 없습니다.</div>';sr.classList.add('visible');return;}
+        sr.innerHTML=m.map(l=>`<a href="law.html?path=${encodeURIComponent(l.path)}" class="hero-search-item"><span class="badge ${getBadgeClass(l.법령구분)}">${l.법령구분}</span><span class="name">${l.제목}</span></a>`).join('')+`<a href="browse.html?q=${encodeURIComponent(si.value.trim())}" class="hero-search-all">전체 결과 보기 &rarr;</a>`;
+        sr.classList.add('visible');
+    }
+    document.addEventListener('click',e=>{if(!document.getElementById('hero-search').contains(e.target))sr.classList.remove('visible');});
+    si.addEventListener('focus',()=>{if(si.value.trim())doSearch();});
+</script>
+
+</body>
+</html>

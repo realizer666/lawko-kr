@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>법령 검색 — LAWKO</title>
+    <meta name="description" content="대한민국 법령을 검색하고 찾아보세요. lawko.kr에서 법률, 시행령, 시행규칙 등 5,500여 개 법령을 제공합니다.">
+    <link rel="canonical" href="https://lawko.kr/browse.html">
+    <meta name="theme-color" content="#0F172A">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lawko.kr/browse.html">
+    <meta property="og:title" content="법령 검색 — LAWKO">
+    <meta property="og:description" content="대한민국 법령을 검색하고 찾아보세요.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --midnight: #0F172A; --midnight-up: #131c33; --midnight-up2: #172035;
+            --slate: #334155; --steel: #94A3B8; --snow: #F8FAFC; --white: #FFFFFF;
+            --accent: #2563EB; --accent-light: #3B82F6; --accent-dark: #1D4ED8;
+            --accent-ghost: rgba(37,99,235,0.08); --accent-glow: rgba(37,99,235,0.15);
+            --border: #1E293B;
+            --font-ui: 'Noto Sans KR', -apple-system, sans-serif;
+            --font-code: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+        body { font-family: var(--font-ui); background: var(--midnight); color: var(--snow); line-height: 1.7; }
+        a { color: inherit; text-decoration: none; }
+
+        /* Nav */
+        nav { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(15,23,42,0.95); backdrop-filter: blur(12px); z-index: 100; }
+        .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px; color: var(--snow); }
+        .nav-brand span { color: var(--accent-light); }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a { font-size: 14px; color: var(--steel); transition: color 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--snow); }
+
+        /* Container */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        /* Header */
+        .page-header { padding: 48px 0 32px; }
+        .page-header h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+        .page-header p { font-size: 15px; color: var(--steel); }
+
+        /* Search & Filters */
+        .search-bar { position: sticky; top: 57px; z-index: 90; background: rgba(15,23,42,0.95); backdrop-filter: blur(12px); padding: 16px 0; border-bottom: 1px solid var(--border); }
+        .search-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .search-input-wrap { flex: 1; min-width: 280px; position: relative; }
+        .search-input-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--slate); pointer-events: none; }
+        .search-input { width: 100%; padding: 12px 16px 12px 42px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 8px; color: var(--snow); font-family: var(--font-ui); font-size: 15px; outline: none; transition: border-color 0.2s; }
+        .search-input:focus { border-color: var(--accent); }
+        .search-input::placeholder { color: var(--slate); }
+
+        .filter-select { padding: 12px 36px 12px 14px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 8px; color: var(--snow); font-family: var(--font-ui); font-size: 14px; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2394A3B8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; transition: border-color 0.2s; }
+        .filter-select:focus { border-color: var(--accent); }
+        .filter-select option { background: var(--midnight-up); color: var(--snow); }
+
+        /* Results info */
+        .results-info { padding: 16px 0 8px; font-size: 13px; color: var(--slate); font-family: var(--font-code); }
+        .results-info strong { color: var(--accent-light); }
+
+        /* Law list */
+        .law-list { display: flex; flex-direction: column; gap: 2px; padding-bottom: 80px; }
+        .law-item { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 8px; transition: background 0.15s; cursor: pointer; }
+        .law-item:hover { background: var(--midnight-up); }
+        .law-badge { font-family: var(--font-code); font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
+        .law-badge.법률 { background: rgba(37,99,235,0.12); color: #60A5FA; }
+        .law-badge.대통령령 { background: rgba(139,92,246,0.12); color: #A78BFA; }
+        .law-badge.부령 { background: rgba(245,158,11,0.12); color: #FBBF24; }
+        .law-badge.규칙 { background: rgba(34,197,94,0.12); color: #4ADE80; }
+        .law-badge.헌법 { background: rgba(239,68,68,0.12); color: #F87171; }
+        .law-title { font-size: 15px; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .law-meta { font-size: 12px; color: var(--slate); font-family: var(--font-code); white-space: nowrap; flex-shrink: 0; }
+        .law-dept { font-size: 12px; color: var(--steel); white-space: nowrap; flex-shrink: 0; display: none; }
+
+        @media (min-width: 768px) {
+            .law-dept { display: block; }
+        }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 80px 24px; color: var(--slate); }
+        .empty-state p { font-size: 16px; margin-top: 12px; }
+
+        /* Loading */
+        .loading { text-align: center; padding: 80px 24px; color: var(--steel); }
+        .loading-spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; gap: 8px; padding: 32px 0 80px; flex-wrap: wrap; }
+        .page-btn { padding: 8px 14px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 6px; color: var(--steel); font-size: 13px; font-family: var(--font-code); cursor: pointer; transition: all 0.15s; }
+        .page-btn:hover { border-color: var(--accent); color: var(--snow); }
+        .page-btn.active { background: var(--accent); border-color: var(--accent); color: var(--white); }
+        .page-btn:disabled { opacity: 0.3; cursor: default; }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 32px 0; }
+        .footer-content { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--slate); }
+        .footer-content a { color: var(--steel); text-decoration: none; }
+        .footer-content a:hover { color: var(--snow); }
+        .footer-links { display: flex; gap: 16px; }
+
+        /* Keyboard shortcut hint */
+        .kbd { font-family: var(--font-code); font-size: 11px; padding: 2px 6px; background: var(--midnight-up2); border: 1px solid var(--border); border-radius: 4px; color: var(--slate); }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="index.html" class="nav-brand">LAW<span>KO</span></a>
+        <div class="nav-links">
+            <a href="browse.html" class="active">법령 검색</a>
+            <a href="precedent.html">판례 검색</a>
+            <a href="about.html">소개</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>법령 검색</h1>
+        <p>대한민국 법령을 검색하고 찾아보세요.</p>
+    </div>
+</div>
+
+<div class="search-bar">
+    <div class="container">
+        <div class="search-row">
+            <div class="search-input-wrap">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" class="search-input" id="search" placeholder="법령명을 입력하세요..." autofocus>
+            </div>
+            <select class="filter-select" id="filter-type">
+                <option value="">모든 법령구분</option>
+                <option value="법률">법률</option>
+                <option value="대통령령">대통령령</option>
+                <option value="부령">부령 (시행규칙 등)</option>
+                <option value="규칙">규칙 (대법원·국회 등)</option>
+            </select>
+            <select class="filter-select" id="filter-status">
+                <option value="">모든 상태</option>
+                <option value="시행" selected>시행 중</option>
+                <option value="폐지">폐지</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="results-info" id="results-info"></div>
+    <div id="law-list" class="law-list">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>법령 목록을 불러오는 중...</p>
+        </div>
+    </div>
+    <div id="pagination" class="pagination"></div>
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <span>&copy; 2026 LAWKO &middot; 데이터 출처: <a href="https://www.law.go.kr" target="_blank" rel="noopener">국가법령정보센터</a></span>
+            <div class="footer-links">
+                <a href="privacy.html">개인정보처리방침</a>
+                <a href="terms.html">이용약관</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+const PER_PAGE = 50;
+let allLaws = [];
+let filtered = [];
+let currentPage = 1;
+
+function getBadgeClass(type) {
+    if (type === '법률' || type === '헌법') return type;
+    if (type === '대통령령' || type === '대통령긴급명령') return '대통령령';
+    if (type.endsWith('규칙')) return '규칙';
+    return '부령';
+}
+
+function getBadgeLabel(type) {
+    if (type === '대통령령') return '대통령령';
+    if (type === '법률') return '법률';
+    if (type === '헌법') return '헌법';
+    if (type === '대통령긴급명령') return '긴급명령';
+    if (type.endsWith('규칙')) return '규칙';
+    // 부령: show short form
+    return type.replace('부령', '').replace('령', '') || '부령';
+}
+
+function matchesTypeFilter(lawType, filterValue) {
+    if (!filterValue) return true;
+    if (filterValue === '법률') return lawType === '법률' || lawType === '헌법';
+    if (filterValue === '대통령령') return lawType === '대통령령' || lawType === '대통령긴급명령';
+    if (filterValue === '부령') return lawType.endsWith('령') && lawType !== '대통령령' && lawType !== '대통령긴급명령';
+    if (filterValue === '규칙') return lawType.endsWith('규칙');
+    return true;
+}
+
+function filterLaws() {
+    const query = document.getElementById('search').value.trim().toLowerCase().replace(/\s/g, '');
+    const typeFilter = document.getElementById('filter-type').value;
+    const statusFilter = document.getElementById('filter-status').value;
+
+    filtered = allLaws.filter(law => {
+        if (query && !law.searchKey.includes(query)) return false;
+        if (!matchesTypeFilter(law.법령구분, typeFilter)) return false;
+        if (statusFilter && law.상태 !== statusFilter) return false;
+        return true;
+    });
+
+    currentPage = 1;
+    render();
+}
+
+function render() {
+    const total = filtered.length;
+    const totalPages = Math.ceil(total / PER_PAGE);
+    const start = (currentPage - 1) * PER_PAGE;
+    const page = filtered.slice(start, start + PER_PAGE);
+
+    // Results info
+    const info = document.getElementById('results-info');
+    const query = document.getElementById('search').value.trim();
+    if (query) {
+        info.innerHTML = `"${query}" 검색 결과 <strong>${total.toLocaleString()}</strong>건`;
+    } else {
+        info.innerHTML = `전체 <strong>${total.toLocaleString()}</strong>건`;
+    }
+
+    // Law list
+    const list = document.getElementById('law-list');
+    if (page.length === 0) {
+        list.innerHTML = '<div class="empty-state"><p>검색 결과가 없습니다.</p></div>';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+    }
+
+    list.innerHTML = page.map(law => {
+        const badgeClass = getBadgeClass(law.법령구분);
+        const badgeLabel = getBadgeLabel(law.법령구분);
+        const dept = (law.소관부처 || []).join(', ');
+        return `<a href="law.html?path=${encodeURIComponent(law.path)}" class="law-item">
+            <span class="law-badge ${badgeClass}">${badgeLabel}</span>
+            <span class="law-title">${law.제목}</span>
+            <span class="law-dept">${dept}</span>
+            <span class="law-meta">${law.시행일자 || ''}</span>
+        </a>`;
+    }).join('');
+
+    // Pagination
+    renderPagination(totalPages);
+}
+
+function renderPagination(totalPages) {
+    const pag = document.getElementById('pagination');
+    if (totalPages <= 1) { pag.innerHTML = ''; return; }
+
+    let buttons = [];
+    const maxVisible = 7;
+
+    buttons.push(`<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">&larr;</button>`);
+
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
+
+    if (startPage > 1) {
+        buttons.push(`<button class="page-btn" data-page="1">1</button>`);
+        if (startPage > 2) buttons.push(`<span class="page-btn" style="border:none;cursor:default">...</span>`);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        buttons.push(`<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`);
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) buttons.push(`<span class="page-btn" style="border:none;cursor:default">...</span>`);
+        buttons.push(`<button class="page-btn" data-page="${totalPages}">${totalPages}</button>`);
+    }
+
+    buttons.push(`<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">&rarr;</button>`);
+
+    pag.innerHTML = buttons.join('');
+    pag.querySelectorAll('button[data-page]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const p = parseInt(btn.dataset.page);
+            if (p >= 1 && p <= totalPages) {
+                currentPage = p;
+                render();
+                document.getElementById('results-info').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+}
+
+// Load data
+fetch('metadata.json')
+    .then(r => r.json())
+    .then(data => {
+        allLaws = Object.entries(data).map(([mst, law]) => ({
+            ...law,
+            법령MST: mst,
+            searchKey: (law.제목 || '').toLowerCase().replace(/\s/g, '')
+        }));
+        // Sort by title
+        allLaws.sort((a, b) => (a.제목 || '').localeCompare(b.제목 || '', 'ko'));
+        filterLaws();
+    })
+    .catch(() => {
+        document.getElementById('law-list').innerHTML = '<div class="empty-state"><p>법령 목록을 불러오지 못했습니다.</p></div>';
+    });
+
+// Event listeners
+let debounceTimer;
+document.getElementById('search').addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(filterLaws, 200);
+});
+document.getElementById('filter-type').addEventListener('change', filterLaws);
+document.getElementById('filter-status').addEventListener('change', filterLaws);
+
+// Keyboard shortcut: / to focus search
+document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== document.getElementById('search')) {
+        e.preventDefault();
+        document.getElementById('search').focus();
+    }
+    if (e.key === 'Escape') {
+        document.getElementById('search').blur();
+    }
+});
+
+// URL query param support
+const urlParams = new URLSearchParams(window.location.search);
+const q = urlParams.get('q');
+if (q) {
+    document.getElementById('search').value = q;
+}
+</script>
+
+</body>
+</html>
