@@ -453,7 +453,12 @@ async function summarizeCase(precSeq, btn, area) {
         // 완료
         let html = renderMarkdown(assembled);
         if (meta && typeof meta.remaining === 'number') {
-            html += `<div class="summary-meta">오늘 남은 요약/상담: ${meta.remaining}/${meta.limit}회${meta.isPro ? ' · Pro' : ''}</div>`;
+            const modelLabel = meta.modelTier === 'pro' ? ' · ✨ 고품질 AI(Sonnet)'
+                             : meta.modelTier === 'free' ? ' · ⚡ 빠른 AI(Haiku)' : '';
+            const upgradeLink = !meta.isPro
+                ? ' · <a href="#" onclick="window.LawkoAuth&&window.LawkoAuth.openSubscribe();return false;" style="color:var(--accent-light);">Pro 업그레이드</a>'
+                : '';
+            html += `<div class="summary-meta">오늘 남은 요약/상담: ${meta.remaining}/${meta.limit}회${meta.isPro ? ' · Pro' : ''}${modelLabel}${upgradeLink}</div>`;
         }
         area.innerHTML = html;
         area.dataset.loaded = '1';

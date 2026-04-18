@@ -17,6 +17,7 @@
   const $quotaLimit = document.getElementById('quota-limit');
   const $quotaPlan = document.getElementById('quota-plan');
   const $quotaUpgrade = document.getElementById('quota-upgrade');
+  const $quotaModel = document.getElementById('quota-model');
 
   const history = []; // {role, content}
   let busy = false;
@@ -95,7 +96,7 @@
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }
 
-  function updateQuota(remaining, limit, isPro) {
+  function updateQuota(remaining, limit, isPro, modelTier) {
     if (typeof remaining === 'number') $quotaRemaining.textContent = remaining;
     if (typeof limit === 'number') $quotaLimit.textContent = limit;
     if (typeof isPro === 'boolean') {
@@ -103,6 +104,24 @@
       $quotaPlan.style.background = isPro ? 'var(--accent)' : '#334155';
       $quotaPlan.style.color = isPro ? '#fff' : '#CBD5E1';
       $quotaUpgrade.style.display = isPro ? 'none' : 'inline-block';
+    }
+    if ($quotaModel) {
+      if (modelTier === 'pro') {
+        $quotaModel.innerHTML = '✨ 고품질 AI';
+        $quotaModel.title = 'Claude Sonnet 4.6 — 더 정확하고 풍부한 답변';
+      } else if (modelTier === 'free') {
+        $quotaModel.innerHTML = '⚡ 빠른 AI · <a href="#" data-lawko="subscribe" style="color:var(--accent-light);text-decoration:underline;">고품질로 업그레이드</a>';
+        $quotaModel.title = 'Claude Haiku 4.5 — Pro 구독 시 Sonnet 4.6으로 업그레이드';
+      } else {
+        $quotaModel.innerHTML = '';
+      }
+      const upLink = $quotaModel.querySelector('[data-lawko="subscribe"]');
+      if (upLink) {
+        upLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.LawkoAuth && window.LawkoAuth.openSubscribe();
+        });
+      }
     }
   }
 
@@ -181,7 +200,7 @@
           try {
             const evt = JSON.parse(data);
             if (evt.type === 'meta') {
-              updateQuota(evt.remaining, evt.limit, evt.isPro);
+              updateQuota(evt.remaining, evt.limit, evt.isPro, evt.modelTier);
             } else if (evt.type === 'delta') {
               if (firstDelta) {
                 assistantEl.classList.remove('loading');
