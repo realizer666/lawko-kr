@@ -102,32 +102,43 @@
   };
 
   // ------- 네비게이션 UI 주입 -------
+  // 로그인 후에는 공간을 아끼기 위해 사용자 아바타 드롭다운으로 표시.
+  // 네비에 메뉴가 많아져 overflow되는 문제 해결.
   function updateNavUI() {
-    const nav = document.querySelector('.top-nav .nav-links, .top-nav .container');
-    if (!nav) return;
+    const navContainer = document.querySelector('.top-nav .container, nav .nav-inner, nav .container');
+    const navLinks = document.querySelector('.top-nav .nav-links, nav .nav-links');
+    const parent = navLinks || navContainer;
+    if (!parent) return;
 
     let slot = document.getElementById('lawko-auth-slot');
     if (!slot) {
       slot = document.createElement('div');
       slot.id = 'lawko-auth-slot';
-      slot.style.cssText = 'display:flex;align-items:center;gap:12px;margin-left:16px;';
-      // nav-links 옆에 붙이거나 container 끝에 추가
-      const navLinks = document.querySelector('.top-nav .nav-links');
-      if (navLinks) {
-        navLinks.appendChild(slot);
-      } else {
-        nav.appendChild(slot);
-      }
+      slot.style.cssText = 'display:flex;align-items:center;gap:8px;margin-left:16px;position:relative;flex-shrink:0;';
+      parent.appendChild(slot);
     }
 
     if (currentUser) {
+      const email = currentUser.email || '';
+      const initial = (email[0] || '?').toUpperCase();
       slot.innerHTML = `
-        <span style="font-size:13px;color:#94A3B8;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-          ${escapeHtml(currentUser.email || '')}
-        </span>
-        ${isPro ? '<span style="font-size:11px;background:#2563EB;color:#fff;padding:3px 8px;border-radius:4px;">Pro</span>' : ''}
-        <button type="button" data-lawko="subscribe" style="font-size:13px;background:#2563EB;color:#fff;border:0;padding:6px 12px;border-radius:6px;cursor:pointer;${isPro ? 'display:none;' : ''}">광고제거</button>
-        <button type="button" data-lawko="logout" style="font-size:13px;background:transparent;color:#94A3B8;border:1px solid #334155;padding:5px 10px;border-radius:6px;cursor:pointer;">로그아웃</button>
+        <button type="button" data-lawko="menu-toggle" style="display:flex;align-items:center;gap:8px;background:transparent;border:1px solid #334155;padding:4px 10px 4px 4px;border-radius:20px;cursor:pointer;color:#F8FAFC;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff;font-size:12px;font-weight:700;">${escapeHtml(initial)}</span>
+          ${isPro ? '<span style="font-size:10px;background:#2563EB;color:#fff;padding:2px 6px;border-radius:3px;font-weight:600;">PRO</span>' : ''}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div id="lawko-user-menu" style="display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:240px;background:#131c33;border:1px solid #1E293B;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,0.4);z-index:1000;overflow:hidden;">
+          <div style="padding:12px 14px;border-bottom:1px solid #1E293B;">
+            <div style="font-size:11px;color:#64748B;margin-bottom:2px;">로그인 계정</div>
+            <div style="font-size:13px;color:#F8FAFC;word-break:break-all;line-height:1.4;">${escapeHtml(email)}</div>
+            ${isPro ? '<div style="margin-top:6px;font-size:11px;color:#22C55E;">✓ 광고제거 · 고품질 AI 이용 중</div>' : '<div style="margin-top:6px;font-size:11px;color:#94A3B8;">무료 플랜</div>'}
+          </div>
+          <a href="bookmarks.html" style="display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;color:#CBD5E1;text-decoration:none;border-bottom:1px solid #1E293B;">🔖 내 즐겨찾기</a>
+          ${!isPro ? `
+            <button type="button" data-lawko="subscribe" style="width:100%;text-align:left;display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;color:#3B82F6;background:transparent;border:0;cursor:pointer;border-bottom:1px solid #1E293B;font-weight:600;">✨ 광고제거 구독</button>
+          ` : ''}
+          <button type="button" data-lawko="logout" style="width:100%;text-align:left;display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;color:#F87171;background:transparent;border:0;cursor:pointer;">↩ 로그아웃</button>
+        </div>
       `;
     } else {
       slot.innerHTML = `
@@ -141,10 +152,30 @@
         const action = e.currentTarget.dataset.lawko;
         if (action === 'login') openAuthModal('login');
         else if (action === 'signup') openAuthModal('signup');
-        else if (action === 'logout') doSignOut();
-        else if (action === 'subscribe') openSubscribeModal();
+        else if (action === 'logout') { closeUserMenu(); doSignOut(); }
+        else if (action === 'subscribe') { closeUserMenu(); openSubscribeModal(); }
+        else if (action === 'menu-toggle') { e.stopPropagation(); toggleUserMenu(); }
       });
     });
+  }
+
+  function toggleUserMenu() {
+    const menu = document.getElementById('lawko-user-menu');
+    if (!menu) return;
+    const willOpen = menu.style.display === 'none';
+    menu.style.display = willOpen ? 'block' : 'none';
+    if (willOpen) {
+      setTimeout(() => document.addEventListener('click', onOutsideClick), 0);
+    }
+  }
+  function closeUserMenu() {
+    const menu = document.getElementById('lawko-user-menu');
+    if (menu) menu.style.display = 'none';
+    document.removeEventListener('click', onOutsideClick);
+  }
+  function onOutsideClick(e) {
+    const slot = document.getElementById('lawko-auth-slot');
+    if (slot && !slot.contains(e.target)) closeUserMenu();
   }
 
   // ------- 인증 동작 -------
