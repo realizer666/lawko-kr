@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <script src="/assets/js/lawko-early-gate.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 계약서 리뷰 — LAWKO</title>
+    <meta name="description" content="AI가 계약서의 독소조항·누락조항·리스크를 분석해드립니다. 근로계약·임대차·용역계약 등.">
+    <meta name="keywords" content="계약서 검토, 계약서 AI, 독소조항, 계약서 분석, 근로계약서 검토">
+    <link rel="canonical" href="https://lawko.kr/contract.html">
+    <meta name="theme-color" content="#0F172A">
+    <meta name="google-adsense-account" content="ca-pub-5056296408239025">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lawko.kr/contract.html">
+    <meta property="og:title" content="AI 계약서 리뷰 — LAWKO">
+    <meta property="og:description" content="AI가 계약서 리스크를 분석해드립니다.">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --midnight: #0F172A; --midnight-up: #131c33; --midnight-up2: #172035;
+            --slate: #334155; --steel: #94A3B8; --snow: #F8FAFC; --white: #FFFFFF;
+            --accent: #2563EB; --accent-light: #3B82F6; --accent-dark: #1D4ED8;
+            --accent-ghost: rgba(37,99,235,0.08);
+            --border: #1E293B;
+            --font-ui: 'Noto Sans KR', -apple-system, sans-serif;
+            --font-code: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { -webkit-font-smoothing: antialiased; }
+        body { font-family: var(--font-ui); background: var(--midnight); color: var(--snow); min-height: 100vh; }
+        a { color: inherit; text-decoration: none; }
+
+        .top-nav { padding: 16px 0; border-bottom: 1px solid var(--border); }
+        .top-nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { font-weight: 700; font-size: 18px; color: var(--snow); letter-spacing: -0.02em; }
+        .nav-brand span { color: var(--accent-light); }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a { font-size: 14px; color: var(--steel); transition: color 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--snow); }
+        .container { max-width: 960px; margin: 0 auto; padding: 0 20px; width: 100%; }
+
+        .page-header { padding: 36px 0 12px; }
+        .page-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+        .page-header h1 .accent { color: var(--accent-light); }
+        .page-header p { color: var(--steel); font-size: 14px; margin-top: 8px; }
+
+        .quota-bar { display: flex; align-items: center; gap: 10px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--steel); margin: 20px 0; flex-wrap: wrap; }
+        .quota-bar strong { color: var(--snow); font-family: var(--font-code); }
+        .quota-bar .quota-plan { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: #334155; color: #CBD5E1; }
+        .quota-bar .quota-plan.pro { background: var(--accent); color: #fff; }
+        .quota-bar .quota-upgrade { margin-left: auto; background: var(--accent); color: #fff; border: 0; font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .quota-bar .quota-upgrade:hover { background: var(--accent-light); }
+
+        .disclaimer { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.3); color: #FBBF24; padding: 12px 16px; border-radius: 10px; font-size: 12px; margin-bottom: 20px; line-height: 1.7; }
+
+        .form-card { background: var(--midnight-up); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+        .form-card label { display: block; font-size: 13px; color: var(--steel); margin-bottom: 6px; }
+        .title-input { width: 100%; padding: 10px 14px; background: var(--midnight); border: 1px solid var(--border); border-radius: 8px; color: var(--snow); font-family: var(--font-ui); font-size: 14px; outline: none; margin-bottom: 16px; }
+        .title-input:focus { border-color: var(--accent); }
+        .contract-textarea { width: 100%; min-height: 280px; padding: 14px 16px; background: var(--midnight); border: 1px solid var(--border); border-radius: 8px; color: var(--snow); font-family: var(--font-ui); font-size: 13px; line-height: 1.7; outline: none; resize: vertical; }
+        .contract-textarea:focus { border-color: var(--accent); }
+        .contract-textarea::placeholder { color: var(--slate); }
+        .char-count { font-size: 11px; color: var(--slate); margin-top: 6px; text-align: right; font-family: var(--font-code); }
+        .char-count.over { color: #F87171; }
+
+        .action-row { display: flex; gap: 10px; margin-top: 16px; align-items: center; flex-wrap: wrap; }
+        .analyze-btn { background: linear-gradient(135deg, var(--accent-light), var(--accent)); color: #fff; border: 0; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+        .analyze-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,0.3); }
+        .analyze-btn:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
+        .sample-btn { background: transparent; color: var(--steel); border: 1px solid var(--border); padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+        .sample-btn:hover { color: var(--snow); border-color: var(--accent); }
+        .clear-btn { background: transparent; color: var(--slate); border: 0; font-size: 12px; cursor: pointer; margin-left: auto; }
+        .clear-btn:hover { color: var(--snow); }
+
+        .report { background: var(--midnight-up); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 40px; line-height: 1.8; font-size: 14px; color: var(--snow); min-height: 200px; display: none; }
+        .report.show { display: block; }
+        .report h2 { font-size: 18px; font-weight: 700; color: var(--accent-light); margin: 24px 0 10px; padding-top: 16px; border-top: 1px solid var(--border); }
+        .report h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+        .report h3 { font-size: 15px; font-weight: 700; color: var(--snow); margin: 16px 0 6px; }
+        .report p { margin: 8px 0; color: #CBD5E1; }
+        .report strong { color: var(--snow); }
+        .report ul, .report ol { padding-left: 22px; margin: 8px 0; }
+        .report li { margin: 4px 0; color: #CBD5E1; }
+        .report blockquote { border-left: 3px solid var(--accent); background: rgba(37,99,235,0.05); padding: 10px 14px; margin: 10px 0; border-radius: 0 6px 6px 0; color: #CBD5E1; font-style: italic; }
+        .report code { background: var(--midnight); padding: 2px 6px; border-radius: 4px; font-family: var(--font-code); font-size: 12px; color: #FBBF24; }
+        .report .cursor { display: inline-block; color: var(--accent-light); animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .report-error { color: #F87171; font-size: 13px; padding: 10px; background: rgba(239,68,68,0.08); border-radius: 6px; margin-top: 12px; }
+
+        .login-required { text-align: center; padding: 60px 20px; color: var(--steel); background: var(--midnight-up); border: 1px solid var(--border); border-radius: 12px; margin: 20px 0; }
+        .login-required h3 { color: var(--snow); font-size: 20px; margin-bottom: 12px; }
+        .login-required button { background: var(--accent); color: #fff; border: 0; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+        .login-required button:hover { background: var(--accent-light); }
+
+        footer { border-top: 1px solid var(--border); padding: 24px 0; margin-top: 40px; }
+        .footer-content { display: flex; justify-content: space-between; font-size: 13px; color: var(--slate); flex-wrap: wrap; gap: 16px; }
+        .footer-content a { color: var(--steel); }
+        .footer-links { display: flex; gap: 16px; }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5056296408239025" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<nav class="top-nav">
+    <div class="container">
+        <a href="index.html" class="nav-brand">LAW<span>KO</span></a>
+        <div class="nav-links">
+            <a href="browse.html">법령 검색</a>
+            <a href="precedent.html">판례 검색</a>
+            <a href="chat.html">AI 상담</a>
+            <a href="contract.html" class="active">계약서 리뷰<span style="font-size:9px;background:#F59E0B;color:#0F172A;padding:2px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;font-weight:700;">PRO</span></a>
+            <a href="about.html">소개</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container">
+    <div class="page-header">
+        <h1><span class="accent">AI</span> 계약서 리뷰</h1>
+        <p>계약서 전문을 붙여넣으면 AI가 독소조항·누락조항·개선점을 분석합니다.</p>
+    </div>
+
+    <div class="disclaimer">
+        ⚠️ 본 서비스는 AI 기반 일반 분석이며 법적 자문이 아닙니다. 중요한 계약은 반드시 변호사 검토를 받으세요.
+        민감한 개인정보(주민번호, 계좌번호 등)는 <strong>마스킹 후</strong> 붙여넣어주세요.
+    </div>
+
+    <div id="quota-bar" class="quota-bar" style="display:none;">
+        <span>오늘 남은 리뷰: <strong id="quota-remaining">-</strong> / <strong id="quota-limit">-</strong></span>
+        <span id="quota-plan" class="quota-plan">무료</span>
+        <button type="button" id="quota-upgrade" class="quota-upgrade" style="display:none;">한도 늘리기 (Pro)</button>
+    </div>
+
+    <div id="login-required" class="login-required" style="display:none;">
+        <h3>로그인이 필요합니다</h3>
+        <p>계약서 리뷰는 로그인한 사용자에게 무료 1회/일 체험으로 제공됩니다.<br>Pro 구독 시 하루 10회까지 가능합니다.</p>
+        <button type="button" onclick="window.LawkoAuth && window.LawkoAuth.openLogin()">로그인 / 회원가입</button>
+    </div>
+
+    <div id="form-wrap" style="display:none;">
+        <div class="form-card">
+            <label for="contract-title">계약서 제목 <span style="color:var(--slate);font-size:11px;">(선택)</span></label>
+            <input type="text" id="contract-title" class="title-input" placeholder="예: 근로계약서 (2026년 4월)" maxlength="100">
+
+            <label for="contract-text">계약서 전문</label>
+            <textarea id="contract-text" class="contract-textarea" placeholder="계약서 내용을 여기에 붙여넣어주세요.
+
+예시:
+제1조 (근무장소 및 업무내용)
+1. 근무장소는 회사가 지정하는 장소로 한다.
+2. 업무내용은 ...
+
+※ 최소 100자, 최대 30,000자까지 분석 가능합니다."></textarea>
+            <div class="char-count"><span id="char-count">0</span> / 30,000자</div>
+
+            <div class="action-row">
+                <button type="button" id="analyze-btn" class="analyze-btn">🔍 계약서 분석</button>
+                <button type="button" id="sample-btn" class="sample-btn">샘플 계약서 넣기</button>
+                <button type="button" id="clear-btn" class="clear-btn">초기화</button>
+            </div>
+        </div>
+
+        <div id="report" class="report"></div>
+    </div>
+
+    <div class="lawko-ad-slot" style="margin:20px 0;min-height:90px;">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-5056296408239025"
+             data-ad-slot="2672729550"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <span>&copy; 2026 LAWKO</span>
+            <div class="footer-links">
+                <a href="privacy.html">개인정보처리방침</a>
+                <a href="terms.html">이용약관</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/js/lawko-config.js"></script>
+<script src="/assets/js/lawko-auth.js"></script>
+<script src="/assets/js/lawko-contract.js"></script>
+
+</body>
+</html>
