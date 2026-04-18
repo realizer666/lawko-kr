@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <script src="/assets/js/lawko-early-gate.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 법률 상담 — LAWKO</title>
+    <meta name="description" content="AI가 답하는 무료 법률 상담. 민법·형법·노동법 등 일반적인 법률 질문을 한국어로 바로 확인하세요.">
+    <meta name="keywords" content="AI 법률상담, 무료 법률상담, 법률챗봇, 법률 AI, 온라인 법률 상담">
+    <link rel="canonical" href="https://lawko.kr/chat.html">
+    <meta name="theme-color" content="#0F172A">
+    <meta name="google-adsense-account" content="ca-pub-5056296408239025">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lawko.kr/chat.html">
+    <meta property="og:title" content="AI 법률 상담 — LAWKO">
+    <meta property="og:description" content="AI가 답하는 무료 법률 상담.">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --midnight: #0F172A; --midnight-up: #131c33; --midnight-up2: #172035;
+            --slate: #334155; --steel: #94A3B8; --snow: #F8FAFC; --white: #FFFFFF;
+            --accent: #2563EB; --accent-light: #3B82F6; --accent-dark: #1D4ED8;
+            --accent-ghost: rgba(37,99,235,0.08); --accent-glow: rgba(37,99,235,0.15);
+            --border: #1E293B;
+            --font-ui: 'Noto Sans KR', -apple-system, sans-serif;
+            --font-code: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { -webkit-font-smoothing: antialiased; height: 100%; }
+        body { font-family: var(--font-ui); background: var(--midnight); color: var(--snow); min-height: 100vh; display: flex; flex-direction: column; }
+        a { color: inherit; text-decoration: none; }
+
+        .top-nav { padding: 16px 0; border-bottom: 1px solid var(--border); }
+        .top-nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { font-weight: 700; font-size: 18px; color: var(--snow); letter-spacing: -0.02em; }
+        .nav-brand span { color: var(--accent-light); }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a { font-size: 14px; color: var(--steel); transition: color 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--snow); }
+        .nav-badge { font-size: 9px; background: var(--accent); color: #fff; padding: 2px 5px; border-radius: 3px; margin-left: 4px; vertical-align: middle; font-weight: 600; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 20px; width: 100%; }
+
+        .chat-shell { flex: 1; display: flex; flex-direction: column; width: 100%; max-width: 900px; margin: 0 auto; padding: 0 20px; }
+        .chat-header { padding: 24px 0 16px; }
+        .chat-header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+        .chat-header h1 .accent { color: var(--accent-light); }
+        .chat-header p { color: var(--steel); font-size: 13px; margin-top: 6px; }
+
+        .quota-bar { display: flex; align-items: center; gap: 10px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--steel); margin-bottom: 14px; flex-wrap: wrap; }
+        .quota-bar strong { color: var(--snow); font-family: var(--font-code); }
+        .quota-bar .quota-upgrade { margin-left: auto; background: var(--accent); color: #fff; border: 0; font-size: 12px; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .quota-bar .quota-upgrade:hover { background: var(--accent-light); }
+
+        .disclaimer { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.3); color: #FBBF24; padding: 10px 14px; border-radius: 10px; font-size: 12px; margin-bottom: 14px; line-height: 1.6; }
+
+        .chat-messages { flex: 1; overflow-y: auto; padding: 8px 0 24px; display: flex; flex-direction: column; gap: 16px; min-height: 300px; }
+        .msg { max-width: 85%; padding: 12px 16px; border-radius: 12px; line-height: 1.7; font-size: 14px; word-wrap: break-word; white-space: pre-wrap; }
+        .msg.user { align-self: flex-end; background: var(--accent); color: #fff; }
+        .msg.assistant { align-self: flex-start; background: var(--midnight-up); border: 1px solid var(--border); color: var(--snow); }
+        .msg.assistant strong { color: var(--accent-light); }
+        .msg .role-tag { display: block; font-size: 11px; color: var(--steel); margin-bottom: 4px; font-family: var(--font-code); }
+        .msg.user .role-tag { color: rgba(255,255,255,0.7); }
+        .msg.loading::after { content: '▋'; animation: blink 1s step-end infinite; color: var(--accent-light); }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .empty-state { align-self: center; text-align: center; color: var(--steel); margin: 40px 0; max-width: 520px; }
+        .empty-state h3 { color: var(--snow); font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+        .empty-state .suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 20px; }
+        .empty-state .sug { background: var(--midnight-up); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+        .empty-state .sug:hover { border-color: var(--accent); color: var(--snow); }
+
+        .chat-input { position: sticky; bottom: 0; background: var(--midnight); padding: 12px 0 20px; border-top: 1px solid var(--border); }
+        .chat-input-box { display: flex; gap: 8px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 12px; padding: 10px; transition: border-color 0.2s; }
+        .chat-input-box:focus-within { border-color: var(--accent); }
+        .chat-input-box textarea { flex: 1; background: transparent; border: 0; color: var(--snow); font-family: var(--font-ui); font-size: 14px; resize: none; outline: none; min-height: 22px; max-height: 160px; line-height: 1.5; padding: 4px 6px; }
+        .chat-input-box textarea::placeholder { color: var(--slate); }
+        .chat-input-box button { background: var(--accent); color: #fff; border: 0; padding: 0 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+        .chat-input-box button:hover:not(:disabled) { background: var(--accent-light); }
+        .chat-input-box button:disabled { background: var(--slate); cursor: not-allowed; opacity: 0.6; }
+
+        .login-required { text-align: center; padding: 60px 20px; color: var(--steel); }
+        .login-required h3 { color: var(--snow); font-size: 20px; margin-bottom: 12px; }
+        .login-required button { background: var(--accent); color: #fff; border: 0; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+        .login-required button:hover { background: var(--accent-light); }
+
+        @media (max-width: 600px) {
+            .nav-links a:not(.active) { font-size: 12px; }
+            .chat-header h1 { font-size: 20px; }
+            .msg { max-width: 92%; font-size: 13px; }
+        }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5056296408239025" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<nav class="top-nav">
+    <div class="container">
+        <a href="index.html" class="nav-brand">LAW<span>KO</span></a>
+        <div class="nav-links">
+            <a href="browse.html">법령 검색</a>
+            <a href="precedent.html">판례 검색</a>
+            <a href="chat.html" class="active">AI 상담<span class="nav-badge">NEW</span></a>
+            <a href="about.html">소개</a>
+        </div>
+    </div>
+</nav>
+
+<main class="chat-shell">
+    <div class="chat-header">
+        <h1><span class="accent">AI</span> 법률 상담</h1>
+        <p>민법·형법·노동법 등 일반적인 법률 질문을 AI에게 물어보세요.</p>
+    </div>
+
+    <div class="disclaimer">
+        ⚠️ 본 서비스는 일반적 법률 정보 안내이며, 개별 사건의 법적 자문이 아닙니다. 구체적 사안은 반드시 변호사 상담을 권장합니다.
+    </div>
+
+    <div id="quota-bar" class="quota-bar" style="display:none;">
+        <span>오늘 남은 상담: <strong id="quota-remaining">-</strong> / <strong id="quota-limit">-</strong></span>
+        <span id="quota-plan" style="font-size:11px;background:#334155;color:#CBD5E1;padding:2px 8px;border-radius:4px;">무료</span>
+        <button type="button" id="quota-upgrade" class="quota-upgrade" style="display:none;">한도 늘리기</button>
+    </div>
+
+    <div id="chat-messages" class="chat-messages">
+        <div id="empty-state" class="empty-state">
+            <h3>무엇을 도와드릴까요?</h3>
+            <p style="font-size:13px;">아래 예시 질문을 눌러보거나, 직접 입력해주세요.</p>
+            <div class="suggestions">
+                <button type="button" class="sug" data-q="월세 계약 중도 해지하면 보증금은 언제 돌려받을 수 있나요?">월세 중도 해지 시 보증금</button>
+                <button type="button" class="sug" data-q="부당해고를 당했는데 어떤 법적 절차를 밟을 수 있나요?">부당해고 대응 절차</button>
+                <button type="button" class="sug" data-q="교통사고 합의금 산정 기준이 궁금합니다.">교통사고 합의금 기준</button>
+                <button type="button" class="sug" data-q="상속 포기와 한정승인의 차이는 무엇인가요?">상속 포기 vs 한정승인</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-required" class="login-required" style="display:none;">
+        <h3>로그인이 필요합니다</h3>
+        <p>AI 상담은 로그인한 사용자에게 하루 3회 무료로 제공됩니다.</p>
+        <button type="button" onclick="window.LawkoAuth && window.LawkoAuth.openLogin()">로그인 / 회원가입</button>
+    </div>
+
+    <div id="chat-input-wrap" class="chat-input" style="display:none;">
+        <div class="chat-input-box">
+            <textarea id="chat-input" placeholder="법률 질문을 입력하세요... (Shift+Enter: 줄바꿈)" rows="1"></textarea>
+            <button type="button" id="send-btn">전송</button>
+        </div>
+        <div style="font-size:11px;color:var(--slate);margin-top:8px;text-align:center;">
+            AI 응답은 오류가 있을 수 있으며, 법적 자문을 대체하지 않습니다.
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/assets/js/lawko-config.js"></script>
+<script src="/assets/js/lawko-auth.js"></script>
+<script src="/assets/js/lawko-chat.js"></script>
+
+</body>
+</html>
