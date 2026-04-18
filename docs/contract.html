@@ -56,6 +56,25 @@
 
         .disclaimer { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.3); color: #FBBF24; padding: 12px 16px; border-radius: 10px; font-size: 12px; margin-bottom: 20px; line-height: 1.7; }
 
+        /* Upload drop zone */
+        .upload-zone { position: relative; border: 2px dashed var(--border); border-radius: 10px; padding: 24px 20px; text-align: center; background: rgba(37,99,235,0.03); transition: all 0.15s; cursor: pointer; margin-bottom: 16px; }
+        .upload-zone:hover, .upload-zone.drag-over { border-color: var(--accent); background: rgba(37,99,235,0.08); }
+        .upload-zone .upload-icon { font-size: 28px; margin-bottom: 6px; }
+        .upload-zone .upload-text { font-size: 13px; color: var(--snow); font-weight: 500; }
+        .upload-zone .upload-sub { font-size: 11px; color: var(--slate); margin-top: 4px; }
+        .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .upload-zone.loading { cursor: wait; opacity: 0.7; }
+        .upload-zone.loading .upload-icon { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .upload-status { font-size: 12px; margin-top: 8px; padding: 8px 12px; border-radius: 6px; display: none; }
+        .upload-status.show { display: block; }
+        .upload-status.ok { background: rgba(34,197,94,0.08); color: #4ADE80; border: 1px solid rgba(34,197,94,0.3); }
+        .upload-status.err { background: rgba(239,68,68,0.08); color: #F87171; border: 1px solid rgba(239,68,68,0.3); }
+        .divider-or { text-align: center; color: var(--slate); font-size: 11px; margin: 0 0 14px; position: relative; font-family: var(--font-code); letter-spacing: 0.1em; }
+        .divider-or::before, .divider-or::after { content: ''; position: absolute; top: 50%; width: calc(50% - 30px); height: 1px; background: var(--border); }
+        .divider-or::before { left: 0; }
+        .divider-or::after { right: 0; }
+
         .form-card { background: var(--midnight-up); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
         .form-card label { display: block; font-size: 13px; color: var(--steel); margin-bottom: 6px; }
         .title-input { width: 100%; padding: 10px 14px; background: var(--midnight); border: 1px solid var(--border); border-radius: 8px; color: var(--snow); font-family: var(--font-ui); font-size: 14px; outline: none; margin-bottom: 16px; }
@@ -145,6 +164,16 @@
             <label for="contract-title">계약서 제목 <span style="color:var(--slate);font-size:11px;">(선택)</span></label>
             <input type="text" id="contract-title" class="title-input" placeholder="예: 근로계약서 (2026년 4월)" maxlength="100">
 
+            <div class="upload-zone" id="upload-zone">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text" id="upload-text">PDF · DOCX · TXT 파일을 드래그하거나 클릭해서 업로드</div>
+                <div class="upload-sub">파일은 브라우저에서만 처리되며 서버로 전송되지 않습니다</div>
+                <input type="file" id="file-input" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+            </div>
+            <div class="upload-status" id="upload-status"></div>
+
+            <div class="divider-or">또는 직접 붙여넣기</div>
+
             <label for="contract-text">계약서 전문</label>
             <textarea id="contract-text" class="contract-textarea" placeholder="계약서 내용을 여기에 붙여넣어주세요.
 
@@ -190,6 +219,14 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs" type="module"></script>
+<script type="module">
+  // pdf.js worker 설정 (전역 노출)
+  import * as pdfjs from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs';
+  pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.mjs';
+  window.pdfjsLib = pdfjs;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <script src="/assets/js/lawko-config.js"></script>
 <script src="/assets/js/lawko-auth.js"></script>
 <script src="/assets/js/lawko-contract.js"></script>

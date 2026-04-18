@@ -86,6 +86,128 @@
 
   $analyzeBtn.addEventListener('click', analyze);
 
+  // ------- 파일 업로드 (PDF / DOCX / TXT) -------
+  const $uploadZone = document.getElementById('upload-zone');
+  const $uploadText = document.getElementById('upload-text');
+  const $uploadStatus = document.getElementById('upload-status');
+  const $fileInput = document.getElementById('file-input');
+  const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
+
+  $fileInput.addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) handleFile(file);
+    // 같은 파일 재선택 허용
+    $fileInput.value = '';
+  });
+
+  // 드래그&드롭
+  ['dragenter', 'dragover'].forEach(evt =>
+    $uploadZone.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      $uploadZone.classList.add('drag-over');
+    })
+  );
+  ['dragleave', 'dragend'].forEach(evt =>
+    $uploadZone.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      $uploadZone.classList.remove('drag-over');
+    })
+  );
+  $uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    $uploadZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  async function handleFile(file) {
+    setUploadStatus('', '');
+    if (file.size > MAX_FILE_BYTES) {
+      setUploadStatus('err', `파일이 너무 큽니다 (최대 10MB). 현재: ${(file.size / 1024 / 1024).toFixed(1)}MB`);
+      return;
+    }
+    const name = file.name;
+    const ext = name.split('.').pop().toLowerCase();
+    const type = file.type;
+
+    $uploadZone.classList.add('loading');
+    $uploadText.textContent = `${name} 처리 중...`;
+
+    try {
+      let text = '';
+      if (ext === 'pdf' || type === 'application/pdf') {
+        text = await extractPdf(file);
+      } else if (ext === 'docx' || type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        text = await extractDocx(file);
+      } else if (ext === 'txt' || type === 'text/plain') {
+        text = await file.text();
+      } else if (ext === 'doc') {
+        throw new Error('구형 .doc 파일은 지원하지 않습니다. .docx로 저장 후 다시 시도해주세요.');
+      } else {
+        throw new Error(`지원하지 않는 형식입니다 (${ext || type || '알수없음'}). PDF, DOCX, TXT만 가능합니다.`);
+      }
+
+      const trimmed = text.trim();
+      if (trimmed.length < 100) {
+        throw new Error(`추출된 텍스트가 너무 짧습니다 (${trimmed.length}자). 스캔 이미지 PDF는 텍스트 추출이 어려울 수 있습니다.`);
+      }
+      if (trimmed.length > 30000) {
+        setUploadStatus('ok', `✓ ${name} (${trimmed.length.toLocaleString()}자) — 30,000자를 초과해 앞부분만 사용됩니다.`);
+        $text.value = trimmed.slice(0, 30000);
+      } else {
+        setUploadStatus('ok', `✓ ${name} (${trimmed.length.toLocaleString()}자)를 성공적으로 불러왔습니다.`);
+        $text.value = trimmed;
+      }
+      $charCount.textContent = $text.value.length.toLocaleString();
+      $charCount.parentElement.classList.toggle('over', $text.value.length > 30000);
+
+      if (!$title.value) {
+        $title.value = name.replace(/\.(pdf|docx|txt)$/i, '');
+      }
+    } catch (e) {
+      setUploadStatus('err', e.message || '파일을 읽지 못했습니다.');
+    } finally {
+      $uploadZone.classList.remove('loading');
+      $uploadText.textContent = 'PDF · DOCX · TXT 파일을 드래그하거나 클릭해서 업로드';
+    }
+  }
+
+  async function extractPdf(file) {
+    if (!window.pdfjsLib) {
+      throw new Error('PDF 라이브러리가 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요.');
+    }
+    const buf = await file.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+    const chunks = [];
+    const maxPages = Math.min(pdf.numPages, 50); // 50쪽까지만
+    for (let i = 1; i <= maxPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const pageText = content.items.map(it => it.str).join(' ');
+      chunks.push(pageText);
+    }
+    return chunks.join('\n\n');
+  }
+
+  async function extractDocx(file) {
+    if (!window.mammoth) {
+      throw new Error('DOCX 라이브러리가 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요.');
+    }
+    const buf = await file.arrayBuffer();
+    const result = await window.mammoth.extractRawText({ arrayBuffer: buf });
+    return result.value || '';
+  }
+
+  function setUploadStatus(kind, msg) {
+    if (!msg) {
+      $uploadStatus.className = 'upload-status';
+      $uploadStatus.textContent = '';
+      return;
+    }
+    $uploadStatus.className = `upload-status show ${kind}`;
+    $uploadStatus.textContent = msg;
+  }
+
   // ------- 분석 -------
   async function analyze() {
     if (busy) return;
