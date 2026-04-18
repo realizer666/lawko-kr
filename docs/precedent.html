@@ -101,6 +101,26 @@
         /* Error */
         .error-box { padding: 16px 20px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; color: #F87171; font-size: 14px; margin: 16px 0; }
 
+        /* Precedent card v2 (with AI summary) */
+        .prec-card-main { display: block; cursor: pointer; }
+        .prec-actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); align-items: center; flex-wrap: wrap; }
+        .summary-btn { background: linear-gradient(135deg, var(--accent-light), var(--accent)); color: #fff; border: 0; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; }
+        .summary-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+        .summary-btn:disabled { opacity: 0.6; cursor: default; }
+        .external-link { font-size: 12px; color: var(--steel); margin-left: auto; }
+        .external-link:hover { color: var(--accent-light); }
+        .summary-area { margin-top: 12px; padding: 16px; background: rgba(37,99,235,0.04); border: 1px solid var(--accent-ghost); border-radius: 8px; font-size: 13px; line-height: 1.8; color: var(--snow); }
+        .summary-area h3 { font-size: 14px; font-weight: 700; margin: 14px 0 6px; color: var(--accent-light); }
+        .summary-area h3:first-child { margin-top: 0; }
+        .summary-area p { margin: 4px 0; color: #CBD5E1; }
+        .summary-area ul, .summary-area ol { padding-left: 18px; margin: 4px 0; }
+        .summary-area li { color: #CBD5E1; margin: 2px 0; }
+        .summary-area strong { color: var(--snow); }
+        .summary-area .cursor { display: inline-block; color: var(--accent-light); animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .summary-error { color: #F87171; font-size: 12px; margin-top: 8px; }
+        .summary-meta { font-size: 11px; color: var(--slate); margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+
         /* Footer */
         footer { border-top: 1px solid var(--border); padding: 32px 0; }
         .footer-content { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--slate); }
@@ -311,21 +331,171 @@ function renderResults(data) {
         const resultType = p.판결유형 || '';
         const detailUrl = p.판례상세링크 ? `https://www.law.go.kr${p.판례상세링크}` : `https://www.law.go.kr/LSW/precInfoP.do?precSeq=${serial}`;
 
-        return `<a href="${detailUrl}" target="_blank" rel="noopener" class="prec-card">
-            <div class="prec-top">
-                ${courtName ? `<span class="prec-badge court">${courtName}</span>` : ''}
-                ${caseType ? `<span class="prec-badge type">${caseType}</span>` : ''}
-                ${resultType ? `<span class="prec-badge result-type">${resultType}</span>` : ''}
-                <span class="prec-case-num">${caseNum}</span>
-                ${judgeDate ? `<span class="prec-date">${judgeDate}</span>` : ''}
+        return `<div class="prec-card" data-seq="${serial}">
+            <a href="${detailUrl}" target="_blank" rel="noopener" class="prec-card-main">
+                <div class="prec-top">
+                    ${courtName ? `<span class="prec-badge court">${courtName}</span>` : ''}
+                    ${caseType ? `<span class="prec-badge type">${caseType}</span>` : ''}
+                    ${resultType ? `<span class="prec-badge result-type">${resultType}</span>` : ''}
+                    <span class="prec-case-num">${caseNum}</span>
+                    ${judgeDate ? `<span class="prec-date">${judgeDate}</span>` : ''}
+                </div>
+                <div class="prec-title">${caseName || caseNum}</div>
+            </a>
+            <div class="prec-actions">
+                <button type="button" class="summary-btn" data-seq="${serial}">✨ AI 요약</button>
+                <a href="${detailUrl}" target="_blank" rel="noopener" class="external-link">원문 보기 →</a>
             </div>
-            <div class="prec-title">${caseName || caseNum}</div>
-        </a>`;
+            <div class="summary-area" data-seq="${serial}" style="display:none;"></div>
+        </div>`;
     }).join('');
+
+    // AI 요약 버튼 핸들러 바인딩
+    listEl.querySelectorAll('.summary-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const seq = btn.dataset.seq;
+            const card = btn.closest('.prec-card');
+            const area = card.querySelector('.summary-area');
+            if (area.dataset.loaded === '1') {
+                area.style.display = area.style.display === 'none' ? 'block' : 'none';
+                return;
+            }
+            if (btn.disabled) return;
+            summarizeCase(seq, btn, area);
+        });
+    });
 
     contentEl.style.display = 'none';
     listEl.style.display = 'flex';
     renderPagination();
+}
+
+// ------- AI 판례 요약 -------
+const SUMMARIZE_URL = `${window.LAWKO_CONFIG.supabaseUrl}/functions/v1/law-summarize`;
+
+async function summarizeCase(precSeq, btn, area) {
+    // 로그인 체크
+    const user = window.LawkoAuth && window.LawkoAuth.getUser();
+    if (!user) {
+        window.LawkoAuth && window.LawkoAuth.openLogin();
+        return;
+    }
+    const cfg = window.LAWKO_CONFIG;
+    const supa = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    const { data: { session } } = await supa.auth.getSession();
+    if (!session) {
+        window.LawkoAuth && window.LawkoAuth.openLogin();
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '⏳ 요약 중...';
+    area.style.display = 'block';
+    area.innerHTML = '<span class="cursor">▋</span>';
+
+    try {
+        const res = await fetch(SUMMARIZE_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ precSeq }),
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({ error: '오류' }));
+            area.innerHTML = `<div class="summary-error">${escapeHtml(err.error || '요약에 실패했습니다.')}</div>`;
+            if (err.code === 'QUOTA_EXCEEDED') {
+                setTimeout(() => {
+                    if (confirm('한도를 모두 사용했습니다. 광고제거 구독으로 하루 50회까지 이용하시겠어요?')) {
+                        window.LawkoAuth && window.LawkoAuth.openSubscribe();
+                    }
+                }, 100);
+            }
+            btn.disabled = false;
+            btn.innerHTML = '✨ AI 요약';
+            return;
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = '';
+        let assembled = '';
+        let meta = null;
+
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buf += decoder.decode(value, { stream: true });
+            const lines = buf.split('\n');
+            buf = lines.pop() ?? '';
+            for (const line of lines) {
+                if (!line.startsWith('data:')) continue;
+                const data = line.slice(5).trim();
+                if (!data) continue;
+                try {
+                    const evt = JSON.parse(data);
+                    if (evt.type === 'meta') {
+                        meta = evt;
+                    } else if (evt.type === 'delta') {
+                        assembled += evt.text;
+                        area.innerHTML = renderMarkdown(assembled) + '<span class="cursor">▋</span>';
+                    } else if (evt.type === 'error') {
+                        area.innerHTML += `<div class="summary-error">${escapeHtml(evt.message)}</div>`;
+                    }
+                } catch { /* 무시 */ }
+            }
+        }
+
+        // 완료
+        let html = renderMarkdown(assembled);
+        if (meta && typeof meta.remaining === 'number') {
+            html += `<div class="summary-meta">오늘 남은 요약/상담: ${meta.remaining}/${meta.limit}회${meta.isPro ? ' · Pro' : ''}</div>`;
+        }
+        area.innerHTML = html;
+        area.dataset.loaded = '1';
+        btn.innerHTML = '✨ 접기 / 펼치기';
+        btn.disabled = false;
+    } catch (e) {
+        area.innerHTML = `<div class="summary-error">네트워크 오류: ${escapeHtml(String(e.message || e))}</div>`;
+        btn.disabled = false;
+        btn.innerHTML = '✨ AI 요약 다시 시도';
+    }
+}
+
+// 초경량 마크다운 렌더 (h3, 단락, 강조, 목록)
+function renderMarkdown(src) {
+    const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    const lines = src.split('\n');
+    let html = '';
+    let inList = false;
+    for (const raw of lines) {
+        const line = raw.trimEnd();
+        if (/^##\s+/.test(line)) {
+            if (inList) { html += '</ul>'; inList = false; }
+            html += `<h3>${applyInline(esc(line.replace(/^##\s+/, '')))}</h3>`;
+        } else if (/^-\s+/.test(line)) {
+            if (!inList) { html += '<ul>'; inList = true; }
+            html += `<li>${applyInline(esc(line.replace(/^-\s+/, '')))}</li>`;
+        } else if (line.trim() === '') {
+            if (inList) { html += '</ul>'; inList = false; }
+        } else {
+            if (inList) { html += '</ul>'; inList = false; }
+            html += `<p>${applyInline(esc(line))}</p>`;
+        }
+    }
+    if (inList) html += '</ul>';
+    return html;
+}
+function applyInline(s) {
+    return s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+}
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]));
 }
 
 function renderPagination() {
