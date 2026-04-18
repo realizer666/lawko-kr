@@ -137,6 +137,7 @@
             <a href="precedent.html">판례 검색</a>
             <a href="chat.html">AI 상담</a>
             <a href="contract.html">계약서 리뷰<span style="font-size:9px;background:#F59E0B;color:#0F172A;padding:2px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;font-weight:700;">PRO</span></a>
+            <a href="bookmarks.html">🔖 즐겨찾기</a>
             <a href="about.html">소개</a>
         </div>
     </div>
@@ -304,6 +305,10 @@ function renderHeader(fm, meta, filePath) {
             ${effDate ? `<div class="meta-item"><span class="meta-label">시행일자</span><span class="meta-value">${effDate}</span></div>` : ''}
         </div>
         <div class="law-actions">
+            <button type="button" id="bookmark-btn" class="law-action-btn" data-bookmarked="0">
+                <span class="bm-icon">🔖</span>
+                <span class="bm-label">즐겨찾기</span>
+            </button>
             ${source ? `<a href="${source}" target="_blank" rel="noopener" class="law-action-btn">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 국가법령정보센터
@@ -319,6 +324,72 @@ function renderHeader(fm, meta, filePath) {
         </div>
     `;
     header.style.display = 'block';
+
+    // 북마크 버튼 바인딩
+    bindBookmarkButton(filePath, title, {
+        '법령구분': type,
+        '소관부처': dept,
+        '공포일자': promDate,
+        '공포번호': promNum,
+        '시행일자': effDate,
+        '상태': status,
+    });
+}
+
+async function bindBookmarkButton(filePath, title, payload) {
+    const btn = document.getElementById('bookmark-btn');
+    if (!btn) return;
+
+    async function refresh() {
+        if (!window.LawkoBookmarks) return;
+        const user = window.LawkoAuth && window.LawkoAuth.getUser();
+        if (!user) {
+            btn.dataset.bookmarked = '0';
+            btn.querySelector('.bm-icon').textContent = '🔖';
+            btn.querySelector('.bm-label').textContent = '즐겨찾기';
+            return;
+        }
+        const yes = await window.LawkoBookmarks.isBookmarked('law', filePath);
+        btn.dataset.bookmarked = yes ? '1' : '0';
+        btn.querySelector('.bm-icon').textContent = yes ? '✅' : '🔖';
+        btn.querySelector('.bm-label').textContent = yes ? '즐겨찾기 해제' : '즐겨찾기';
+        btn.style.color = yes ? 'var(--accent-light)' : '';
+        btn.style.borderColor = yes ? 'var(--accent)' : '';
+    }
+
+    btn.addEventListener('click', async () => {
+        try {
+            const user = window.LawkoAuth && window.LawkoAuth.getUser();
+            if (!user) {
+                window.LawkoAuth && window.LawkoAuth.openLogin();
+                return;
+            }
+            btn.disabled = true;
+            const now = await window.LawkoBookmarks.toggle('law', filePath, title, payload);
+            btn.dataset.bookmarked = now ? '1' : '0';
+            btn.querySelector('.bm-icon').textContent = now ? '✅' : '🔖';
+            btn.querySelector('.bm-label').textContent = now ? '즐겨찾기 해제' : '즐겨찾기';
+            btn.style.color = now ? 'var(--accent-light)' : '';
+            btn.style.borderColor = now ? 'var(--accent)' : '';
+        } catch (e) {
+            if (String(e.message || e) === 'LOGIN_REQUIRED') {
+                window.LawkoAuth && window.LawkoAuth.openLogin();
+            } else {
+                alert('즐겨찾기 저장 실패: ' + (e.message || e));
+            }
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    // 로그인 상태 추적해서 초기 렌더
+    let lastUid = null;
+    setInterval(() => {
+        const u = window.LawkoAuth && window.LawkoAuth.getUser();
+        const uid = u ? u.id : null;
+        if (uid !== lastUid) { lastUid = uid; refresh(); }
+    }, 500);
+    refresh();
 }
 
 function renderRelated(filePath, metadata) {
@@ -429,5 +500,6 @@ backToTop.addEventListener('click', () => {
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/js/lawko-config.js"></script>
 <script src="/assets/js/lawko-auth.js"></script>
+<script src="/assets/js/lawko-bookmarks.js"></script>
 </body>
 </html>

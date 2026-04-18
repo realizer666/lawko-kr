@@ -109,6 +109,9 @@
         .summary-btn:disabled { opacity: 0.6; cursor: default; }
         .external-link { font-size: 12px; color: var(--steel); margin-left: auto; }
         .external-link:hover { color: var(--accent-light); }
+        .bookmark-btn { background: transparent; border: 1px solid var(--border); color: var(--steel); font-size: 14px; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.15s; line-height: 1; }
+        .bookmark-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--snow); }
+        .bookmark-btn:disabled { opacity: 0.5; cursor: wait; }
         .summary-area { margin-top: 12px; padding: 16px; background: rgba(37,99,235,0.04); border: 1px solid var(--accent-ghost); border-radius: 8px; font-size: 13px; line-height: 1.8; color: var(--snow); }
         .summary-area h3 { font-size: 14px; font-weight: 700; margin: 14px 0 6px; color: var(--accent-light); }
         .summary-area h3:first-child { margin-top: 0; }
@@ -140,6 +143,7 @@
             <a href="precedent.html" class="active">판례 검색</a>
             <a href="chat.html">AI 상담</a>
             <a href="contract.html">계약서 리뷰<span style="font-size:9px;background:#F59E0B;color:#0F172A;padding:2px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;font-weight:700;">PRO</span></a>
+            <a href="bookmarks.html">🔖 즐겨찾기</a>
             <a href="about.html">소개</a>
         </div>
     </div>
@@ -345,6 +349,7 @@ function renderResults(data) {
             </a>
             <div class="prec-actions">
                 <button type="button" class="summary-btn" data-seq="${serial}">✨ AI 요약</button>
+                <button type="button" class="bookmark-btn" data-seq="${serial}" data-title="${(caseName || caseNum).replace(/"/g, '&quot;')}" data-payload='${JSON.stringify({caseNum, courtName, caseType, judgeDate, resultType, detailUrl}).replace(/'/g, "&apos;")}' title="즐겨찾기">🔖</button>
                 <a href="${detailUrl}" target="_blank" rel="noopener" class="external-link">원문 보기 →</a>
             </div>
             <div class="summary-area" data-seq="${serial}" style="display:none;"></div>
@@ -364,6 +369,38 @@ function renderResults(data) {
             }
             if (btn.disabled) return;
             summarizeCase(seq, btn, area);
+        });
+    });
+
+    // 북마크 버튼 바인딩
+    listEl.querySelectorAll('.bookmark-btn').forEach(btn => {
+        const seq = btn.dataset.seq;
+        // 초기 상태 확인
+        if (window.LawkoBookmarks) {
+            window.LawkoBookmarks.isBookmarked('precedent', seq).then(yes => {
+                if (yes) { btn.textContent = '✅'; btn.title = '즐겨찾기 해제'; btn.style.color = 'var(--accent-light)'; }
+            });
+        }
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const user = window.LawkoAuth && window.LawkoAuth.getUser();
+            if (!user) { window.LawkoAuth && window.LawkoAuth.openLogin(); return; }
+            btn.disabled = true;
+            try {
+                const title = btn.dataset.title;
+                let payload = {};
+                try { payload = JSON.parse(btn.dataset.payload.replace(/&apos;/g, "'")); } catch {}
+                const now = await window.LawkoBookmarks.toggle('precedent', seq, title, payload);
+                btn.textContent = now ? '✅' : '🔖';
+                btn.title = now ? '즐겨찾기 해제' : '즐겨찾기';
+                btn.style.color = now ? 'var(--accent-light)' : '';
+            } catch (err) {
+                if (String(err.message || err) !== 'LOGIN_REQUIRED') {
+                    alert('저장 실패: ' + (err.message || err));
+                }
+            } finally {
+                btn.disabled = false;
+            }
         });
     });
 
@@ -561,5 +598,6 @@ document.addEventListener('keydown', e => {
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/js/lawko-config.js"></script>
 <script src="/assets/js/lawko-auth.js"></script>
+<script src="/assets/js/lawko-bookmarks.js"></script>
 </body>
 </html>

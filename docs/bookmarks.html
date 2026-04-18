@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <script src="/assets/js/lawko-early-gate.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 즐겨찾기 — LAWKO</title>
+    <meta name="description" content="저장한 법령과 판례를 한 곳에서 관리하세요.">
+    <link rel="canonical" href="https://lawko.kr/bookmarks.html">
+    <meta name="theme-color" content="#0F172A">
+    <meta name="google-adsense-account" content="ca-pub-5056296408239025">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --midnight: #0F172A; --midnight-up: #131c33;
+            --slate: #334155; --steel: #94A3B8; --snow: #F8FAFC;
+            --accent: #2563EB; --accent-light: #3B82F6;
+            --accent-ghost: rgba(37,99,235,0.08);
+            --border: #1E293B;
+            --font-ui: 'Noto Sans KR', -apple-system, sans-serif;
+            --font-code: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { -webkit-font-smoothing: antialiased; }
+        body { font-family: var(--font-ui); background: var(--midnight); color: var(--snow); min-height: 100vh; }
+        a { color: inherit; text-decoration: none; }
+
+        .top-nav { padding: 16px 0; border-bottom: 1px solid var(--border); }
+        .top-nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { font-weight: 700; font-size: 18px; color: var(--snow); }
+        .nav-brand span { color: var(--accent-light); }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a { font-size: 14px; color: var(--steel); transition: color 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--snow); }
+        .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+        .page-header { padding: 36px 0 20px; }
+        .page-header h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+        .page-header p { color: var(--steel); font-size: 14px; margin-top: 6px; }
+
+        .tabs { display: flex; gap: 6px; margin: 16px 0 24px; border-bottom: 1px solid var(--border); }
+        .tab { background: transparent; border: 0; color: var(--steel); padding: 10px 16px; font-family: var(--font-ui); font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+        .tab:hover { color: var(--snow); }
+        .tab.active { color: var(--accent-light); border-bottom-color: var(--accent); font-weight: 600; }
+        .tab .count { font-family: var(--font-code); font-size: 11px; background: var(--midnight-up); color: var(--steel); padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
+        .tab.active .count { background: var(--accent); color: #fff; }
+
+        .list { display: flex; flex-direction: column; gap: 10px; padding-bottom: 40px; }
+        .item { display: flex; gap: 14px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 10px; padding: 16px; transition: border-color 0.15s; align-items: center; }
+        .item:hover { border-color: var(--accent); }
+        .item-main { flex: 1; min-width: 0; }
+        .item-title { font-size: 14px; font-weight: 600; color: var(--snow); overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; line-height: 1.5; }
+        .item-meta { font-size: 11px; color: var(--slate); font-family: var(--font-code); display: flex; gap: 10px; flex-wrap: wrap; }
+        .item-meta .badge { padding: 1px 6px; border-radius: 3px; background: rgba(37,99,235,0.1); color: #60A5FA; }
+        .item-meta .badge.prec { background: rgba(139,92,246,0.1); color: #A78BFA; }
+        .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .item-btn { background: transparent; border: 1px solid var(--border); color: var(--steel); padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+        .item-btn:hover { color: var(--snow); border-color: var(--accent); }
+        .item-btn.danger:hover { color: #F87171; border-color: #F87171; }
+        .item-notify { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--steel); cursor: pointer; }
+        .item-notify input { accent-color: var(--accent); }
+
+        .empty { text-align: center; padding: 80px 20px; color: var(--steel); }
+        .empty .icon { font-size: 42px; margin-bottom: 12px; }
+        .empty h3 { color: var(--snow); font-size: 18px; margin-bottom: 8px; }
+        .empty a { color: var(--accent-light); text-decoration: underline; }
+
+        .login-box { text-align: center; padding: 60px 20px; background: var(--midnight-up); border: 1px solid var(--border); border-radius: 12px; margin: 20px 0; }
+        .login-box h3 { color: var(--snow); margin-bottom: 8px; }
+        .login-box button { background: var(--accent); color: #fff; border: 0; padding: 10px 22px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 12px; }
+        .login-box button:hover { background: var(--accent-light); }
+
+        footer { border-top: 1px solid var(--border); padding: 24px 0; margin-top: 40px; }
+        .footer-content { display: flex; justify-content: space-between; font-size: 13px; color: var(--slate); flex-wrap: wrap; gap: 16px; }
+        .footer-content a { color: var(--steel); }
+        .footer-links { display: flex; gap: 16px; }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5056296408239025" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<nav class="top-nav">
+    <div class="container">
+        <a href="index.html" class="nav-brand">LAW<span>KO</span></a>
+        <div class="nav-links">
+            <a href="browse.html">법령 검색</a>
+            <a href="precedent.html">판례 검색</a>
+            <a href="chat.html">AI 상담</a>
+            <a href="contract.html">계약서 리뷰</a>
+            <a href="bookmarks.html" class="active">🔖 즐겨찾기</a>
+            <a href="about.html">소개</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container">
+    <div class="page-header">
+        <h1>🔖 내 즐겨찾기</h1>
+        <p>저장한 법령과 판례를 한 곳에서 관리하세요. Phase 2.2에서 법령 개정 이메일 알림이 추가됩니다.</p>
+    </div>
+
+    <div id="login-box" class="login-box" style="display:none;">
+        <h3>로그인이 필요합니다</h3>
+        <p style="color:var(--steel);font-size:13px;">로그인하면 저장한 법령과 판례를 관리할 수 있습니다.</p>
+        <button type="button" onclick="window.LawkoAuth && window.LawkoAuth.openLogin()">로그인 / 회원가입</button>
+    </div>
+
+    <div id="tabs-wrap" style="display:none;">
+        <div class="tabs">
+            <button type="button" class="tab active" data-tab="all">전체<span class="count" id="count-all">0</span></button>
+            <button type="button" class="tab" data-tab="law">법령<span class="count" id="count-law">0</span></button>
+            <button type="button" class="tab" data-tab="precedent">판례<span class="count" id="count-precedent">0</span></button>
+        </div>
+
+        <div id="list" class="list"></div>
+    </div>
+
+    <div class="lawko-ad-slot" style="margin:24px 0;min-height:90px;">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-5056296408239025"
+             data-ad-slot="2672729550"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <span>&copy; 2026 LAWKO</span>
+            <div class="footer-links">
+                <a href="privacy.html">개인정보처리방침</a>
+                <a href="terms.html">이용약관</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/js/lawko-config.js"></script>
+<script src="/assets/js/lawko-auth.js"></script>
+<script src="/assets/js/lawko-bookmarks.js"></script>
+<script>
+(function () {
+    const $loginBox = document.getElementById('login-box');
+    const $tabsWrap = document.getElementById('tabs-wrap');
+    const $list = document.getElementById('list');
+    const $countAll = document.getElementById('count-all');
+    const $countLaw = document.getElementById('count-law');
+    const $countPrec = document.getElementById('count-precedent');
+    let all = [];
+    let currentTab = 'all';
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+    }
+
+    function render() {
+        const items = currentTab === 'all' ? all : all.filter(b => b.target_type === currentTab);
+        if (items.length === 0) {
+            $list.innerHTML = `
+                <div class="empty">
+                    <div class="icon">🔖</div>
+                    <h3>아직 저장한 항목이 없습니다</h3>
+                    <p style="font-size:13px;margin-top:6px;">
+                        <a href="browse.html">법령</a> 또는 <a href="precedent.html">판례</a>를 검색하고 🔖 버튼을 눌러 저장해보세요.
+                    </p>
+                </div>`;
+            return;
+        }
+        $list.innerHTML = items.map(b => {
+            const isLaw = b.target_type === 'law';
+            const payload = b.payload || {};
+            const url = isLaw
+                ? `law.html?path=${encodeURIComponent(b.target_id)}`
+                : (payload.detailUrl || `https://www.law.go.kr/LSW/precInfoP.do?precSeq=${b.target_id}`);
+            const external = !isLaw;
+            const badges = [];
+            if (isLaw) {
+                if (payload['법령구분']) badges.push(`<span class="badge">${escapeHtml(payload['법령구분'])}</span>`);
+                if (payload['시행일자']) badges.push(`시행 ${escapeHtml(payload['시행일자'])}`);
+            } else {
+                if (payload.courtName) badges.push(`<span class="badge prec">${escapeHtml(payload.courtName)}</span>`);
+                if (payload.caseNum) badges.push(escapeHtml(payload.caseNum));
+                if (payload.judgeDate) badges.push(escapeHtml(payload.judgeDate));
+            }
+            return `
+                <div class="item" data-id="${b.id}" data-type="${b.target_type}" data-target="${escapeHtml(b.target_id)}">
+                    <div class="item-main">
+                        <div class="item-title">
+                            <a href="${escapeHtml(url)}" ${external ? 'target="_blank" rel="noopener"' : ''}>${escapeHtml(b.title || '')}</a>
+                        </div>
+                        <div class="item-meta">
+                            <span class="badge ${b.target_type === 'precedent' ? 'prec' : ''}">${b.target_type === 'law' ? '법령' : '판례'}</span>
+                            ${badges.join(' ')}
+                        </div>
+                    </div>
+                    ${isLaw ? `
+                        <label class="item-notify" title="법령 개정 시 알림 (Phase 2.2에서 이메일 발송)">
+                            <input type="checkbox" ${b.notify_on_change ? 'checked' : ''} data-id="${b.id}">
+                            알림
+                        </label>
+                    ` : ''}
+                    <div class="item-actions">
+                        <a href="${escapeHtml(url)}" ${external ? 'target="_blank" rel="noopener"' : ''} class="item-btn">열기</a>
+                        <button type="button" class="item-btn danger" data-action="delete">삭제</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        $list.querySelectorAll('[data-action="delete"]').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (!confirm('이 즐겨찾기를 삭제할까요?')) return;
+                const item = btn.closest('.item');
+                const type = item.dataset.type;
+                const target = item.dataset.target;
+                btn.disabled = true;
+                try {
+                    await window.LawkoBookmarks.remove(type, target);
+                    all = all.filter(b => !(b.target_type === type && b.target_id === target));
+                    updateCounts();
+                    render();
+                } catch (err) {
+                    alert('삭제 실패: ' + (err.message || err));
+                    btn.disabled = false;
+                }
+            });
+        });
+
+        $list.querySelectorAll('.item-notify input').forEach(cb => {
+            cb.addEventListener('change', async (e) => {
+                const id = cb.dataset.id;
+                try {
+                    await window.LawkoBookmarks.setNotify(id, cb.checked);
+                    const found = all.find(b => b.id === id);
+                    if (found) found.notify_on_change = cb.checked;
+                } catch (err) {
+                    cb.checked = !cb.checked;
+                    alert('변경 실패: ' + (err.message || err));
+                }
+            });
+        });
+    }
+
+    function updateCounts() {
+        $countAll.textContent = all.length;
+        $countLaw.textContent = all.filter(b => b.target_type === 'law').length;
+        $countPrec.textContent = all.filter(b => b.target_type === 'precedent').length;
+    }
+
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentTab = tab.dataset.tab;
+            render();
+        });
+    });
+
+    async function load() {
+        const user = window.LawkoAuth && window.LawkoAuth.getUser();
+        if (!user) {
+            $loginBox.style.display = 'block';
+            $tabsWrap.style.display = 'none';
+            return;
+        }
+        $loginBox.style.display = 'none';
+        $tabsWrap.style.display = 'block';
+        all = await window.LawkoBookmarks.list(['law', 'precedent']);
+        updateCounts();
+        render();
+    }
+
+    let lastUid = null;
+    setInterval(() => {
+        const u = window.LawkoAuth && window.LawkoAuth.getUser();
+        const uid = u ? u.id : null;
+        if (uid !== lastUid) { lastUid = uid; load(); }
+    }, 500);
+    load();
+})();
+</script>
+
+</body>
+</html>
