@@ -1,0 +1,27 @@
+{
+  "name": "lawko-kr",
+  "version": "1.0.0",
+  "description": "GitHub Pages로 호스팅되는 정적 법령 검색 사이트. `docs/` 폴더가 배포 루트.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/realizer666/lawko-kr.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/realizer666/lawko-kr/issues"
+  },
+  "homepage": "https://github.com/realizer666/lawko-kr#readme",
+  "devDependencies": {
+    "playwright": "^1.59.1"
+  }
+}
