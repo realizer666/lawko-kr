@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/realizer666/lawko-kr#readme",
   "devDependencies": {
-    "playwright": "^1.59.1"
+    "playwright": "^1.59.1",
+    "sharp": "^0.34.5"
   }
 }
