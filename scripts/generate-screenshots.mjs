@@ -24,7 +24,7 @@ const BASE = "https://lawko.kr";
 
 const PAGES = [
   { path: "/", name: "01-home" },
-  { path: "/law.html", name: "02-law-search" },
+  { path: "/law.html?path=kr/민법/법률.md", name: "02-law-search" },
   { path: "/precedent.html", name: "03-precedent" },
   { path: "/bookmarks.html", name: "04-bookmarks" },
   { path: "/browse.html", name: "05-browse" },
