@@ -334,8 +334,19 @@
           현재 결제는 <strong>모바일 앱</strong>에서 가능합니다. 앱을 설치하고 동일한 이메일로 로그인하시면 웹에서도 광고가 자동으로 제거됩니다.
         </p>
         <div class="lawko-modal-btn-row">
-          <a href="${cfg.iosAppUrl}" target="_blank" class="lawko-modal-primary">App Store</a>
-          <a href="${cfg.androidAppUrl}" target="_blank" class="lawko-modal-primary alt">Google Play</a>
+          ${(function(){
+            // iOS 사용자 / iOS 앱 WebView 에서는 Google Play 버튼 숨김.
+            // App Store Review Guideline 2.3.10 (Accurate Metadata) + 3.1.3
+            // (외부 플랫폼 결제 유도 금지) 회피.
+            const ua = navigator.userAgent || '';
+            const isIOS = /iPhone|iPad|iPod/i.test(ua) || (ua.includes('Mac') && 'ontouchend' in document);
+            const isAndroid = /Android/i.test(ua);
+            const iosBtn = `<a href="${cfg.iosAppUrl}" target="_blank" class="lawko-modal-primary">App Store</a>`;
+            const aosBtn = `<a href="${cfg.androidAppUrl}" target="_blank" class="lawko-modal-primary alt">Google Play</a>`;
+            if (isIOS) return iosBtn;
+            if (isAndroid) return aosBtn;
+            return iosBtn + aosBtn;
+          })()}
         </div>
       </div>
     `;
