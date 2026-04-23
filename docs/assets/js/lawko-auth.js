@@ -69,6 +69,19 @@
         localStorage.removeItem(PRO_CACHE_KEY);
       }
     } catch (_) { /* noop */ }
+    // Flutter iOS 앱 내장 WebView 에서 열렸다면, 네이티브 bridge 로 세션 직접 동기화.
+    // 기존 localStorage polling fallback 에 더해 이벤트 기반으로도 즉시 반영.
+    try {
+      if (typeof window !== 'undefined' && window.flutter_inappwebview) {
+        const { data: { session } = {} } = await s.auth.getSession();
+        window.flutter_inappwebview.callHandler(
+          'onWebAuthChange',
+          session
+            ? { access_token: session.access_token, refresh_token: session.refresh_token }
+            : null,
+        );
+      }
+    } catch (e) { /* bridge 호출 실패는 무시 */ }
     updateNavUI();
     applyAdGate();
     return { user: currentUser, isPro };
